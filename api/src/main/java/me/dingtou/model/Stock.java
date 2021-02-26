@@ -1,8 +1,5 @@
 package me.dingtou.model;
 
-import com.alibaba.fastjson.annotation.JSONField;
-import com.alibaba.fastjson.serializer.ToStringSerializer;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import me.dingtou.constant.Market;
 import me.dingtou.constant.Status;
 import me.dingtou.constant.StockType;

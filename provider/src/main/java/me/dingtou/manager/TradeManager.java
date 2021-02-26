@@ -103,6 +103,26 @@ public class TradeManager {
                 .collect(Collectors.toList());
     }
 
+    public void importOrder(Order order) {
+        Order dbOrder = queryByOutId(order.getStock(), order.getOutId());
+        if (null != dbOrder) {
+            return;
+        }
+        StockOrder stockOrder = new StockOrder();
+        Stock stock = order.getStock();
+        stockOrder.setStockId(stock.getId());
+        stockOrder.setCode(stock.getCode());
+        stockOrder.setOutId(order.getOutId());
+        stockOrder.setCreateTime(order.getCreateTime());
+        stockOrder.setTradeTime(order.getTradeTime());
+        stockOrder.setTradeAmount(order.getTradeAmount());
+        stockOrder.setTradeFee(order.getTradeFee());
+        stockOrder.setTradeServiceFee(order.getTradeServiceFee());
+        stockOrder.setTradeStatus(order.getStatus().getCode());
+        stockOrder.setType(order.getType().getCode());
+        stockOrderDAO.insert(stockOrder);
+    }
+
     /**
      * 下单
      *

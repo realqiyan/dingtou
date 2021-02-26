@@ -1,7 +1,5 @@
 package me.dingtou.model;
 
-import com.alibaba.fastjson.annotation.JSONField;
-import com.alibaba.fastjson.serializer.ToStringSerializer;
 import me.dingtou.constant.TradeStatus;
 import me.dingtou.constant.TradeType;
 

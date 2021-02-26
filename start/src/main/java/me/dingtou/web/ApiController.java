@@ -7,7 +7,9 @@ import me.dingtou.constant.StockType;
 import me.dingtou.constant.TradeStatus;
 import me.dingtou.model.Order;
 import me.dingtou.model.Stock;
+import me.dingtou.model.StockPackage;
 import me.dingtou.model.TradeCfg;
+import me.dingtou.service.DataService;
 import me.dingtou.service.StockService;
 import me.dingtou.service.TradeService;
 import me.dingtou.strategy.trade.AverageValueTradeStrategy;
@@ -31,6 +33,9 @@ public class ApiController {
 
     @Autowired
     private TradeService tradeService;
+
+    @Autowired
+    private DataService dataService;
 
     /**
      * <pre>
@@ -150,5 +155,18 @@ public class ApiController {
     public List<Order> tradeSettlement(@RequestParam(value = "owner", required = true, defaultValue = "default") String owner)
             throws Exception {
         return tradeService.settlement(owner);
+    }
+
+    @RequestMapping(value = "/export", method = RequestMethod.GET)
+    public StockPackage exportData(@RequestParam(value = "owner", required = true, defaultValue = "default") String owner)
+            throws Exception {
+        return dataService.exportData(owner);
+    }
+
+
+    @RequestMapping(value = "/import", method = RequestMethod.POST)
+    public boolean importData(@RequestParam(value = "data", required = true) String data)
+            throws Exception {
+        return dataService.importData(JSON.parseObject(data, StockPackage.class));
     }
 }

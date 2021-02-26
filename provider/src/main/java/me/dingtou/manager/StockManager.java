@@ -6,9 +6,9 @@ import me.dingtou.constant.StockType;
 import me.dingtou.dao.StockDAO;
 import me.dingtou.model.Stock;
 import me.dingtou.util.StockConvert;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 @Component
 public class StockManager {
 
-    @Autowired
+    @Resource
     private StockDAO stockDAO;
 
     public Stock create(Stock stock) {
@@ -26,8 +26,6 @@ public class StockManager {
                 || null == stock.getType()) {
             return null;
         }
-        stock.setAmount(BigDecimal.ZERO);
-        stock.setTotalFee(BigDecimal.ZERO);
         me.dingtou.dataobject.Stock entity = StockConvert.convert(stock);
         int insert = stockDAO.insert(entity);
         if (insert == 1) {

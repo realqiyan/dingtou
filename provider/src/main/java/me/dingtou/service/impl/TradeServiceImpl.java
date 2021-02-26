@@ -6,9 +6,9 @@ import me.dingtou.manager.TradeManager;
 import me.dingtou.model.Order;
 import me.dingtou.model.Stock;
 import me.dingtou.service.TradeService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,11 +16,11 @@ import java.util.List;
 @Service
 public class TradeServiceImpl implements TradeService {
 
-    @Autowired
+    @Resource
     private StockManager stockManager;
 
 
-    @Autowired
+    @Resource
     private TradeManager tradeManager;
 
     @Override
