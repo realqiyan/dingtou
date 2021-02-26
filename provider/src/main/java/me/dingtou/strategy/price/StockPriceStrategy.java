@@ -69,7 +69,7 @@ public class StockPriceStrategy extends BasePriceStrategy {
         }
         if (null != stockPrices) {
             stockPrices = stockPrices.stream()
-                    .filter(e -> ChronoUnit.DAYS.between(e.getDate().toInstant(), date.toInstant()) > 0)
+                    .filter(e -> ChronoUnit.DAYS.between(e.getDate().toInstant(), date.toInstant()) >= 0)
                     .collect(Collectors.toList());
         }
         return stockPrices;

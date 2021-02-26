@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -54,11 +55,13 @@ public class TradeManager {
 
         BigDecimal tradeFee = null;
         BigDecimal tradeAmount = null;
+        BigDecimal tradeServiceFee = null;
         for (TradeStrategy tradeStrategy : tradeStrategies) {
             if (tradeStrategy.isMatch(stock)) {
                 TradeDetail calculate = tradeStrategy.calculateConform(stock, now);
                 tradeFee = calculate.getTradeFee();
                 tradeAmount = calculate.getTradeAmount();
+                tradeServiceFee = calculate.getTradeServiceFee();
             }
         }
         if (null == tradeFee) {
@@ -67,7 +70,7 @@ public class TradeManager {
         order.setTradeFee(tradeFee);
         order.setTradeAmount(tradeAmount);
         // 服务费
-        order.setTradeServiceFee(BigDecimal.ZERO);
+        order.setTradeServiceFee(tradeServiceFee);
 
         if (tradeFee.doubleValue() >= 0) {
             order.setType(TradeType.BUY);

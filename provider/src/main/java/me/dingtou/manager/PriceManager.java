@@ -66,6 +66,9 @@ public class PriceManager {
      * @return
      */
     public BigDecimal getSmaPrice(Stock stock, Date date, int x) {
+        if (x <= 0) {
+            return null;
+        }
         for (PriceStrategy priceStrategy : priceStrategies) {
             if (priceStrategy.isMatch(stock)) {
                 return priceStrategy.smaPrice(stock, date, x);

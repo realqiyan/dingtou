@@ -1,6 +1,7 @@
 package me.dingtou.manager;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import me.dingtou.constant.Status;
 import me.dingtou.constant.StockType;
 import me.dingtou.dao.StockDAO;
 import me.dingtou.model.Stock;
@@ -58,6 +59,7 @@ public class StockManager {
         }
         QueryWrapper<me.dingtou.dataobject.Stock> query = new QueryWrapper<me.dingtou.dataobject.Stock>();
         query.eq("owner", owner);
+        query.eq("status", Status.NORMAL.getCode());
         if (null != type) {
             query.eq("type", type.getCode());
         }
@@ -76,6 +78,7 @@ public class StockManager {
         }
         QueryWrapper<me.dingtou.dataobject.Stock> query = new QueryWrapper<me.dingtou.dataobject.Stock>();
         query.eq("owner", owner);
+        query.eq("status", Status.NORMAL.getCode());
         query.eq("type", type.getCode());
         query.eq("code", code);
         List<me.dingtou.dataobject.Stock> dbStockList = stockDAO.selectList(query);

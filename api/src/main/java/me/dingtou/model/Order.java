@@ -60,6 +60,13 @@ public class Order {
         return orderId;
     }
 
+    public String getStockCode() {
+        if (null == this.getStock()) {
+            return null;
+        }
+        return this.getStock().getCode();
+    }
+
     public void setOrderId(Long orderId) {
         this.orderId = orderId;
     }

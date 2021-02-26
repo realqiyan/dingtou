@@ -12,11 +12,16 @@ import me.dingtou.service.StockService;
 import me.dingtou.service.TradeService;
 import me.dingtou.strategy.trade.AverageValueTradeStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+
+import static me.dingtou.strategy.trade.AverageValueTradeStrategy.AVERAGE_STRATEGY_KEY;
+import static me.dingtou.strategy.trade.AverageValueTradeStrategy.CURRENT_TARGET_VALUE_KEY;
 
 @RestController
 public class ApiController {
@@ -27,10 +32,15 @@ public class ApiController {
     @Autowired
     private TradeService tradeService;
 
-
     /**
-     * http://127.0.0.1:8080/stock/add?type=fund&code=159905&increment=500&serviceFeeRate=0.00015&minServiceFee=0&market=fund&minTradeAmount=0.01
-     * http://127.0.0.1:8080/stock/add?type=stock&code=161005&increment=500&serviceFeeRate=0.00015&minServiceFee=0.2&market=sz&minTradeAmount=100
+     * <pre>
+     * http://127.0.0.1:8080/stock/add?type=fund&code=005827&increment=500&serviceFeeRate=0.0015&minServiceFee=0&market=fund&minTradeAmount=0.01
+     * http://127.0.0.1:8080/stock/add?type=stock&code=510300&increment=500&serviceFeeRate=0.0001&minServiceFee=0.2&market=sh&minTradeAmount=100
+     * http://127.0.0.1:8080/stock/add?type=stock&code=510500&increment=500&serviceFeeRate=0.0001&minServiceFee=0.2&market=sh&minTradeAmount=100
+     * http://127.0.0.1:8080/stock/add?type=stock&code=510900&increment=500&serviceFeeRate=0.0001&minServiceFee=0.2&market=sh&minTradeAmount=100
+     * http://127.0.0.1:8080/stock/add?type=stock&code=159905&increment=500&serviceFeeRate=0.0001&minServiceFee=0.2&market=sz&minTradeAmount=100
+     * http://127.0.0.1:8080/stock/add?type=stock&code=515180&increment=500&serviceFeeRate=0.0001&minServiceFee=0.2&market=sh&minTradeAmount=100
+     * </pre>
      *
      * @param owner
      * @param type
@@ -66,12 +76,26 @@ public class ApiController {
         tradeCfg.setMinServiceFee(new BigDecimal(minServiceFee));
         tradeCfg.setMinTradeAmount(new BigDecimal(minTradeAmount));
 
+        Map<String, String> attributes = new HashMap<>();
+        attributes.put(CURRENT_TARGET_VALUE_KEY, "0");
+
+        Map<Integer, String> averageStrategy = new HashMap<>(4, 1.0f);
+        // 默认1倍
+        averageStrategy.put(0, "1");
+        // 低于30日均线 目标增量1.5倍
+        averageStrategy.put(30, "1.5");
+        // 低于60日均线 目标增量2倍
+        averageStrategy.put(60, "2.0");
+        // 低于120日均线 目标增量2.5倍
+        averageStrategy.put(120, "2.5");
+        attributes.put(AVERAGE_STRATEGY_KEY, JSON.toJSONString(averageStrategy));
+
+        tradeCfg.setAttributes(attributes);
         stock.setTradeCfg(tradeCfg);
 
         Stock dbStock = stockService.create(stock);
         return dbStock;
     }
-
 
     @RequestMapping(value = "/stock/query", method = RequestMethod.GET)
     public List<Stock> queryStock(@RequestParam(value = "owner", required = true, defaultValue = "default") String owner,
@@ -85,7 +109,6 @@ public class ApiController {
         return stockList;
     }
 
-
     @RequestMapping(value = "/trade/conform", method = RequestMethod.GET)
     public List<Order> tradeConform(@RequestParam(value = "owner", required = true, defaultValue = "default") String owner)
             throws Exception {
@@ -95,6 +118,9 @@ public class ApiController {
             //
         }
         List<Stock> stockList = stockService.query(owner, null);
+        if (null == stockList || stockList.isEmpty()) {
+            return Collections.emptyList();
+        }
         List<Order> orderList = new ArrayList<>();
         for (Stock stock : stockList) {
             Order conform = tradeService.conform(stock.getOwner(), stock.getType(), stock.getCode());

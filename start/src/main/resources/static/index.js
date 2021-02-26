@@ -11,6 +11,7 @@ function reloadData(){
         tradeData = result;
         $("#json").JSONView(tradeData);
         $('#buy-btn').show();
+        $('#json').JSONView('toggle', 2);
       }
     });
 }
@@ -52,12 +53,12 @@ $(function() {
         settlement();
     });
 
-    $('#toggle-btn').on('click', function() {
-        $('#json').JSONView('toggle');
-    });
+//    $('#toggle-btn').on('click', function() {
+//        $('#json').JSONView('toggle');
+//    });
 
-    $('#toggle-level3-btn').on('click', function() {
-        $('#json').JSONView('toggle', 3);
+    $('#toggle-level-btn').on('click', function() {
+        $('#json').JSONView('toggle', 2);
     });
 
     $('#reload-btn').on('click', function() {

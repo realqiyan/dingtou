@@ -1,12 +1,10 @@
 package me.dingtou.web;
 
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.Map;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * @author qiyan
@@ -16,15 +14,14 @@ import java.util.Map;
 public class MainController {
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
-    public @ResponseBody
-    String home() throws Exception {
-        return "success";
+    public void home(HttpServletResponse response) throws Exception {
+        response.sendRedirect("index.html");
     }
 
-    @RequestMapping(value = "/trade", method = RequestMethod.GET)
-    public String trade(Map<String, Object> map) throws Exception {
-        map.put("time", System.currentTimeMillis());
-        return "trade";
-    }
+//    @RequestMapping(value = "/trade", method = RequestMethod.GET)
+//    public String trade(Map<String, Object> map) throws Exception {
+//        map.put("time", System.currentTimeMillis());
+//        return "trade";
+//    }
 
 }

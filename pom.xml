@@ -7,7 +7,6 @@
         <module>api</module>
         <module>provider</module>
         <module>start</module>
-        <module>code-generator</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>

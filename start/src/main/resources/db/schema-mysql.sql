@@ -1,62 +1,78 @@
--- MySQL Workbench Forward Engineering
+CREATE DATABASE  IF NOT EXISTS `dingtou` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+USE `dingtou`;
+-- MySQL dump 10.13  Distrib 8.0.20, for macos10.15 (x86_64)
+--
+-- Host: 127.0.0.1    Database: dingtou
+-- ------------------------------------------------------
+-- Server version	8.0.20
 
-SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
-SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
-SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!50503 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
--- -----------------------------------------------------
--- Schema dingtou
--- -----------------------------------------------------
+--
+-- Table structure for table `stock`
+--
 
--- -----------------------------------------------------
--- Schema dingtou
--- -----------------------------------------------------
-CREATE SCHEMA IF NOT EXISTS `dingtou` DEFAULT CHARACTER SET utf8mb4 ;
-USE `dingtou` ;
+DROP TABLE IF EXISTS `stock`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `stock` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `code` varchar(45) NOT NULL COMMENT '股票基金编码',
+  `type` varchar(45) NOT NULL COMMENT '股票/基金',
+  `market` varchar(45) NOT NULL COMMENT '市场：沪、深、港、美、基',
+  `owner` varchar(45) NOT NULL DEFAULT 'sys' COMMENT '归属人',
+  `trade_cfg` json NOT NULL COMMENT '交易配置：例如交易费用等',
+  `total_fee` decimal(10,4) NOT NULL COMMENT '总投入金额',
+  `amount` decimal(10,4) NOT NULL COMMENT '持有份额',
+  `last_trade_time` datetime DEFAULT NULL,
+  `trade_status` varchar(45) NOT NULL COMMENT '当前状态：结算中，结算完毕',
+  `status` int NOT NULL DEFAULT '1' COMMENT '状态 0失效 1有效',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1362067770606362626 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
--- -----------------------------------------------------
--- Table `dingtou`.`stock`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `dingtou`.`stock` (
-  `id` BIGINT NOT NULL AUTO_INCREMENT,
-  `code` VARCHAR(45) NOT NULL COMMENT '股票基金编码',
-  `type` VARCHAR(45) NOT NULL COMMENT '股票/基金',
-  `market` VARCHAR(45) NOT NULL COMMENT '市场：沪、深、港、美、基',
-  `owner` VARCHAR(45) NOT NULL DEFAULT 'sys' COMMENT '归属人',
-  `trade_cfg` JSON NOT NULL COMMENT '交易配置：例如交易费用等',
-  `total_fee` DECIMAL(10,4) NOT NULL COMMENT '总投入金额',
-  `amount` DECIMAL(10,4) NOT NULL COMMENT '持有份额',
-  `last_trade_time` DATETIME NULL,
-  `trade_status` VARCHAR(45) NOT NULL COMMENT '当前状态：结算中，结算完毕',
-  `status` INT NOT NULL DEFAULT 1 COMMENT '状态 0失效 1有效',
-  PRIMARY KEY (`id`))
-ENGINE = InnoDB;
+--
+-- Table structure for table `stock_order`
+--
 
-
--- -----------------------------------------------------
--- Table `dingtou`.`stock_order`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `dingtou`.`stock_order` (
-  `id` BIGINT NOT NULL AUTO_INCREMENT,
-  `stock_id` BIGINT NOT NULL,
-  `code` VARCHAR(45) NOT NULL,
-  `create_time` DATETIME NOT NULL,
-  `type` VARCHAR(45) NOT NULL COMMENT 'buy:买 sell:卖 bc:补偿',
-  `out_id` VARCHAR(45) NOT NULL,
-  `trade_time` DATE NOT NULL COMMENT '交易日期',
-  `trade_fee` DECIMAL(10,4) NOT NULL COMMENT '交易金额',
-  `trade_amount` DECIMAL(10,4) NOT NULL COMMENT '交易数量',
-  `trade_service_fee` DECIMAL(10,4) NOT NULL COMMENT '交易服务费',
-  `trade_status` VARCHAR(45) NOT NULL COMMENT '0:进行中 1:结算完成',
+DROP TABLE IF EXISTS `stock_order`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `stock_order` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `stock_id` bigint NOT NULL,
+  `code` varchar(45) NOT NULL,
+  `create_time` datetime NOT NULL,
+  `type` varchar(45) NOT NULL COMMENT 'buy:买 sell:卖 bc:补偿',
+  `out_id` varchar(45) NOT NULL,
+  `trade_time` date DEFAULT NULL COMMENT '交易日期',
+  `trade_fee` decimal(10,4) NOT NULL COMMENT '交易金额',
+  `trade_amount` decimal(10,4) NOT NULL COMMENT '交易数量',
+  `trade_service_fee` decimal(10,4) NOT NULL COMMENT '交易服务费',
+  `trade_status` varchar(45) NOT NULL COMMENT '0:进行中 1:结算完成',
   PRIMARY KEY (`id`),
-  CONSTRAINT `stock_id`
-    FOREIGN KEY (`stock_id`)
-    REFERENCES `dingtou`.`stock` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
+  UNIQUE KEY `uk_stock_order_out_id` (`out_id`),
+  KEY `stock_id` (`stock_id`),
+  CONSTRAINT `stock_id` FOREIGN KEY (`stock_id`) REFERENCES `stock` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1362104835805044738 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
-SET SQL_MODE=@OLD_SQL_MODE;
-SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
-SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+-- Dump completed
