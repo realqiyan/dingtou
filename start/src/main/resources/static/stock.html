@@ -12,11 +12,30 @@
 <body>
 <a href="index.html">Trade</a>
 <a href="stock.html">Stock</a>
+<a href="adjust.html">Adjust</a>
 <a href="data.html">Data</a>
 <br/>
 <h2>标的数据</h2>
-<button id="reload-btn">重新加载</button>
+<button id="reload-btn">加载全部</button>
 <button id="toggle-btn">折叠全部</button>
+<br/>
+<select id="market" name="market">
+    <option value="">选择证券市场</option>
+    <option value="sh">上交所</option>
+    <option value="sz">深交所</option>
+    <option value="fund">场外基金</option>
+</select>
+<select id="type" name="type">
+    <option value="">选择证券类型</option>
+    <option value="func">场外基金</option>
+    <option value="stock">场内证券</option>
+</select>
+<input id="code" name="code" placeholder="证券代码：515180">
+<input id="increment" name="increment" placeholder="每周买入金额：1000">
+<input id="serviceFeeRate" name="serviceFeeRate" placeholder="费率：0.0001">
+<input id="minServiceFee" name="minServiceFee" placeholder="最小服务费：5.0">
+<input id="minTradeAmount" name="minTradeAmount" placeholder="每手股数：100/0.01">
+<button id="add-btn">添加</button>
 <br/>
 <div id="json">加载中...</div>
 </body>

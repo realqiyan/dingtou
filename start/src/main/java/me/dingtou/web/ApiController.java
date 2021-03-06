@@ -1,10 +1,7 @@
 package me.dingtou.web;
 
 import com.alibaba.fastjson.JSON;
-import me.dingtou.constant.Market;
-import me.dingtou.constant.Status;
-import me.dingtou.constant.StockType;
-import me.dingtou.constant.TradeStatus;
+import me.dingtou.constant.*;
 import me.dingtou.model.Order;
 import me.dingtou.model.Stock;
 import me.dingtou.model.StockPackage;
@@ -98,6 +95,9 @@ public class ApiController {
         tradeCfg.setAttributes(attributes);
         stock.setTradeCfg(tradeCfg);
 
+        stock.setTotalFee(BigDecimal.ZERO);
+        stock.setAmount(BigDecimal.ZERO);
+
         Stock dbStock = stockService.create(stock);
         return dbStock;
     }
@@ -151,10 +151,46 @@ public class ApiController {
         return resultOrders;
     }
 
+    @RequestMapping(value = "/trade/adjust", method = RequestMethod.POST)
+    public Order tradeAdjust(@RequestParam(value = "owner", required = true, defaultValue = "default") String owner,
+                             @RequestParam(value = "type", required = true) String type,
+                             @RequestParam(value = "code", required = true) String code,
+                             @RequestParam(value = "tradeFee", required = true) String tradeFeeInput,
+                             @RequestParam(value = "tradeAmount", required = true) String tradeAmountInput,
+                             @RequestParam(value = "tradeServiceFee", required = true) String tradeServiceFeeInput)
+            throws Exception {
+        BigDecimal tradeFee = new BigDecimal(tradeFeeInput);
+        BigDecimal tradeAmount = new BigDecimal(tradeAmountInput);
+        BigDecimal tradeServiceFee = new BigDecimal(tradeServiceFeeInput);
+
+        Stock stock = stockService.query(owner, StockType.of(type), code);
+        if (null == stock) {
+            return null;
+        }
+        Order order = new Order();
+        order.setStock(stock);
+        order.setType(TradeType.ADJUST);
+        order.setStatus(TradeStatus.DONE);
+        Date now = new Date();
+        order.setTradeTime(now);
+        order.setCreateTime(now);
+        order.setOutId(String.valueOf(System.currentTimeMillis()));
+        order.setTradeFee(tradeFee);
+        order.setTradeAmount(tradeAmount);
+        order.setTradeServiceFee(tradeServiceFee);
+        return tradeService.adjust(order);
+    }
+
     @RequestMapping(value = "/trade/settlement", method = RequestMethod.GET)
     public List<Order> tradeSettlement(@RequestParam(value = "owner", required = true, defaultValue = "default") String owner)
             throws Exception {
         return tradeService.settlement(owner);
+    }
+
+    @RequestMapping(value = "/statistic", method = RequestMethod.GET)
+    public Boolean redoStatistic(@RequestParam(value = "owner", required = true, defaultValue = "default") String owner)
+            throws Exception {
+        return tradeService.statistic(owner);
     }
 
     @RequestMapping(value = "/export", method = RequestMethod.GET)

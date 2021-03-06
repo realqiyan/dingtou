@@ -152,6 +152,33 @@ public class TradeManager {
         return queryByOutId(order.getStock(), order.getOutId());
     }
 
+    /**
+     * 调整
+     *
+     * @param order
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public Order adjust(Order order) {
+        StockOrder stockOrder = new StockOrder();
+        Stock stock = order.getStock();
+        stockOrder.setStockId(stock.getId());
+        stockOrder.setCode(stock.getCode());
+        stockOrder.setOutId(order.getOutId());
+        stockOrder.setCreateTime(order.getCreateTime());
+        stockOrder.setTradeTime(order.getTradeTime());
+        stockOrder.setTradeAmount(order.getTradeAmount());
+        stockOrder.setTradeFee(order.getTradeFee());
+        stockOrder.setTradeServiceFee(order.getTradeServiceFee());
+        stockOrder.setTradeStatus(order.getStatus().getCode());
+        stockOrder.setType(order.getType().getCode());
+        stockOrderDAO.insert(stockOrder);
+        stock.setAmount(stock.getAmount().add(order.getTradeAmount()));
+        stock.setTotalFee(stock.getTotalFee().add(order.getTradeFee()));
+        stockManager.update(stock);
+        return queryByOutId(order.getStock(), order.getOutId());
+    }
+
     @Transactional(rollbackFor = Exception.class)
     public List<Order> settlement(Stock stock) {
         List<Order> orders = new ArrayList<>();

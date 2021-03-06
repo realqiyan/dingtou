@@ -2,6 +2,7 @@ package me.dingtou.service;
 
 import me.dingtou.constant.StockType;
 import me.dingtou.model.Order;
+import me.dingtou.model.Stock;
 
 import java.util.List;
 
@@ -28,6 +29,15 @@ public interface TradeService {
      */
     Order buy(Order order);
 
+
+    /**
+     * 调整订单
+     *
+     * @param order
+     * @return
+     */
+    Order adjust(Order order);
+
     /**
      * 交易结算
      *
@@ -35,4 +45,12 @@ public interface TradeService {
      * @return
      */
     List<Order> settlement(String owner);
+
+    /**
+     * 重新统计交易数据
+     *
+     * @param owner
+     * @return
+     */
+    boolean statistic(String owner);
 }
