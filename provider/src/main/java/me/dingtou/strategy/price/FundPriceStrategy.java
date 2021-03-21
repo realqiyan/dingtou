@@ -38,7 +38,10 @@ public class FundPriceStrategy extends BasePriceStrategy {
         try {
             List<StockPrice> stockPrices = pullPrices(stock, date, 1);
             if (null != stockPrices && !stockPrices.isEmpty()) {
-                return stockPrices.get(0).getPrice();
+                StockPrice stockPrice = stockPrices.get(0);
+                if (ChronoUnit.DAYS.between(stockPrice.getDate().toInstant(), date.toInstant()) == 0) {
+                    return stockPrice.getPrice();
+                }
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -73,7 +76,7 @@ public class FundPriceStrategy extends BasePriceStrategy {
                     finalPrices.add(price);
                 });
                 prices = finalPrices.stream()
-                        .filter(e -> ChronoUnit.DAYS.between(e.getDate().toInstant(), date.toInstant()) > 0)
+                        .filter(e -> ChronoUnit.DAYS.between(e.getDate().toInstant(), date.toInstant()) >= 0)
                         .collect(Collectors.toList());
                 return prices;
             }
