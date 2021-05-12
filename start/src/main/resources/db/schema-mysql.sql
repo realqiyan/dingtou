@@ -33,7 +33,7 @@ CREATE TABLE `stock` (
   `trade_cfg` json NOT NULL COMMENT '交易配置：例如交易费用等',
   `total_fee` decimal(10,4) NOT NULL COMMENT '总投入金额',
   `amount` decimal(10,4) NOT NULL COMMENT '持有份额',
-  `last_trade_time` datetime DEFAULT NULL,
+  `last_trade_time` date DEFAULT NULL,
   `trade_status` varchar(45) NOT NULL COMMENT '当前状态：结算中，结算完毕',
   `status` int NOT NULL DEFAULT '1' COMMENT '状态 0失效 1有效',
   PRIMARY KEY (`id`)

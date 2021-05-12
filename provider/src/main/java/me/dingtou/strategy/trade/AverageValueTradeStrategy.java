@@ -10,6 +10,8 @@ import me.dingtou.model.Stock;
 import me.dingtou.model.TradeCfg;
 import me.dingtou.model.TradeDetail;
 import me.dingtou.strategy.TradeStrategy;
+import me.dingtou.util.OrderUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -45,6 +47,11 @@ public class AverageValueTradeStrategy implements TradeStrategy {
     public static final String CURRENT_TARGET_VALUE_KEY = "currentTargetValue";
 
     /**
+     * 最大目标价值
+     */
+    public static final String MAX_TARGET_VALUE_KEY = "maxTargetValue";
+
+    /**
      * 配置0日均线代表调整默认倍率（默认倍率1） 浮动策略： {120:"2",60:"1.5",30:"1",0:"0"}
      */
     public static final String AVERAGE_STRATEGY_KEY = "averageStrategy";
@@ -78,6 +85,23 @@ public class AverageValueTradeStrategy implements TradeStrategy {
 
     @Override
     public TradeDetail calculateConform(Stock stock, Date date) {
+        TradeCfg tradeCfg = stock.getTradeCfg();
+        // 策略扩展参数初始化
+        Map<String, String> attributes = tradeCfg.getAttributes();
+        if (null == attributes) {
+            attributes = new HashMap<>();
+            tradeCfg.setAttributes(attributes);
+        }
+        // 已经投入部分的目标价值
+        BigDecimal currentTargetValue = BigDecimal.valueOf(0);
+        if (attributes.containsKey(CURRENT_TARGET_VALUE_KEY)) {
+            currentTargetValue = new BigDecimal(attributes.get(CURRENT_TARGET_VALUE_KEY));
+        }
+        // 已经买过就跳过计算
+        Date lastTradeTime = stock.getLastTradeTime();
+        if (null != lastTradeTime && DateUtils.isSameDay(lastTradeTime, OrderUtils.getNextTradeTime(stock, date))) {
+            return new TradeDetail(currentTargetValue, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
+        }
         // 当前价格
         BigDecimal currentPrice = priceManager.getCurrentPrice(stock);
         // 当前份额
@@ -85,20 +109,6 @@ public class AverageValueTradeStrategy implements TradeStrategy {
         // 当前价值
         BigDecimal currentValue = amount.multiply(currentPrice);
         currentValue = currentValue.setScale(2, RoundingMode.HALF_UP);
-
-        TradeCfg tradeCfg = stock.getTradeCfg();
-        // 策略扩展参数
-        Map<String, String> attributes = tradeCfg.getAttributes();
-        if (null == attributes) {
-            attributes = new HashMap<>();
-            tradeCfg.setAttributes(attributes);
-        }
-
-        // 已经投入部分的目标价值
-        BigDecimal currentTargetValue = BigDecimal.valueOf(0);
-        if (attributes.containsKey(CURRENT_TARGET_VALUE_KEY)) {
-            currentTargetValue = new BigDecimal(attributes.get(CURRENT_TARGET_VALUE_KEY));
-        }
 
         // 翻倍策略
         Map<Integer, String> averageStrategy = new HashMap<>();
@@ -137,12 +147,23 @@ public class AverageValueTradeStrategy implements TradeStrategy {
             }
             // 均线&倍率
             String multiplyVal = averageStrategy.get(averageVal);
+            log.info("stock:{},averageDay:{},multiplyVal:{}", stock.getCode(), averageVal, multiplyVal);
             increment = increment.multiply(new BigDecimal(multiplyVal));
             break;
         }
 
         // 目标价值=上期目标价值+increment
         BigDecimal targetValue = currentTargetValue.add(increment);
+
+        // 买入上限
+        if (attributes.containsKey(MAX_TARGET_VALUE_KEY)) {
+            BigDecimal maxTargetValue = new BigDecimal(attributes.get(MAX_TARGET_VALUE_KEY));
+            if (targetValue.compareTo(maxTargetValue) > 0) {
+                log.info("stock:{},maxTargetValue:{},targetValue:{}", stock.getCode(), maxTargetValue, targetValue);
+                targetValue = maxTargetValue;
+            }
+        }
+
         attributes.put(CURRENT_TARGET_VALUE_KEY, targetValue.toPlainString());
 
         // 交易金额

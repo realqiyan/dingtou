@@ -11,6 +11,7 @@ import me.dingtou.model.Stock;
 import me.dingtou.model.TradeDetail;
 import me.dingtou.strategy.TradeStrategy;
 import me.dingtou.util.OrderConvert;
+import me.dingtou.util.OrderUtils;
 import org.quartz.CronExpression;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -80,7 +81,7 @@ public class TradeManager {
             order.setOutId(buildOutId(TradeType.SELL, now, stock));
         }
 
-        order.setTradeTime(buildTradeTime(now, stock));
+        order.setTradeTime(OrderUtils.getNextTradeTime(stock, now));
 
         return order;
     }
@@ -238,20 +239,6 @@ public class TradeManager {
             return OrderConvert.convert(stock, stockOrders.get(0));
         }
         return null;
-    }
-
-    private Date buildTradeTime(Date now, Stock stock) {
-        if (StockType.FUND.equals(stock.getType())) {
-            CronExpression cron = null;
-            try {
-                cron = new CronExpression(stock.getTradeCfg().getTradeCron());
-                return cron.getNextValidTimeAfter(now);
-            } catch (ParseException e) {
-                return new Date();
-            }
-        } else {
-            return now;
-        }
     }
 
     private String buildOutId(TradeType type, Date now, Stock stock) {

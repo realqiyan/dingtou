@@ -30,4 +30,6 @@ spring:
   jackson:
     generator:
       write_numbers_as_strings: true
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
 
