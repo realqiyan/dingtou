@@ -3,9 +3,13 @@ package me.dingtou.strategy.price;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import lombok.extern.slf4j.Slf4j;
 import me.dingtou.constant.Market;
 import me.dingtou.model.Stock;
 import me.dingtou.model.StockPrice;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.stereotype.Component;
 
@@ -16,13 +20,23 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
  * 场外基金价格
  */
 @Component
+@Slf4j
 public class FundPriceStrategy extends BasePriceStrategy {
+
+    // 30秒缓存
+    private Cache<String, BigDecimal> cache = CacheBuilder.newBuilder()
+            .maximumSize(500)
+            .expireAfterWrite(30, TimeUnit.SECONDS)
+            .build();
+
     @Override
     public boolean isMatch(Stock stock) {
         return Market.FUND.equals(stock.getMarket());
@@ -30,7 +44,12 @@ public class FundPriceStrategy extends BasePriceStrategy {
 
     @Override
     public BigDecimal currentPrice(Stock stock) {
-        return getCurrentFundPrice(stock);
+        try {
+            return cache.get(stock.getStockUniqueKey(), () -> getCurrentFundPrice(stock));
+        } catch (ExecutionException e) {
+            log.error("get currentPrice error. stock:" + stock, e);
+            return null;
+        }
     }
 
     @Override
@@ -105,6 +124,9 @@ public class FundPriceStrategy extends BasePriceStrategy {
             fundData = JSON.parseObject(content.toString());
             JSONObject expansion = fundData.getJSONObject("Expansion");
             String gz = expansion.getString("GZ");
+            if (StringUtils.isBlank(gz)) {
+                return new BigDecimal(price);
+            }
             Date gztime = DateUtils.parseDate(expansion.getString("GZTIME"), "yyyy-MM-dd HH:mm");
 
             if (null != fsrq && DateUtils.isSameDay(fsrq, gztime)) {

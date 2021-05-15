@@ -18,8 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -34,9 +32,6 @@ public class TradeManager {
 
     @Resource
     private StockManager stockManager;
-
-    @Resource
-    private PriceManager priceManager;
 
     @Resource
     private List<TradeStrategy> tradeStrategies;
@@ -67,6 +62,15 @@ public class TradeManager {
         }
         if (null == tradeFee) {
             tradeFee = stock.getTradeCfg().getIncrement();
+        }
+        if (null == tradeFee) {
+            tradeFee = BigDecimal.ZERO;
+        }
+        if (null == tradeAmount) {
+            tradeAmount = BigDecimal.ZERO;
+        }
+        if (null == tradeServiceFee) {
+            tradeServiceFee = BigDecimal.ZERO;
         }
         order.setTradeFee(tradeFee);
         order.setTradeAmount(tradeAmount);
@@ -248,7 +252,7 @@ public class TradeManager {
         try {
             cron = new CronExpression(stock.getTradeCfg().getTradeCron());
             tradeDate = cron.getNextValidTimeAfter(now);
-        } catch (ParseException e) {
+        } catch (Exception e) {
             tradeDate = new Date();
         }
 

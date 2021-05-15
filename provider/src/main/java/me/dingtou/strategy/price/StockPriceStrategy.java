@@ -3,21 +3,22 @@ package me.dingtou.strategy.price;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import lombok.extern.slf4j.Slf4j;
 import me.dingtou.constant.Market;
 import me.dingtou.model.Stock;
 import me.dingtou.model.StockPrice;
-import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -25,7 +26,15 @@ import java.util.stream.Collectors;
  * A股价格
  */
 @Component
+@Slf4j
 public class StockPriceStrategy extends BasePriceStrategy {
+
+    // 30秒缓存
+    private Cache<String, StringBuffer> cache = CacheBuilder.newBuilder()
+            .maximumSize(500)
+            .expireAfterWrite(30, TimeUnit.SECONDS)
+            .build();
+
     @Override
     public boolean isMatch(Stock stock) {
         return Market.SH.equals(stock.getMarket()) || Market.SZ.equals(stock.getMarket());
@@ -77,7 +86,13 @@ public class StockPriceStrategy extends BasePriceStrategy {
 
 
     private BigDecimal getStockPrice(String url) {
-        StringBuffer urlContent = getUrlContent(url);
+        StringBuffer urlContent = null;
+        try {
+            urlContent = cache.get(url, () -> getUrlContent(url));
+        } catch (ExecutionException e) {
+            log.error("getUrlContent error.url:" + url, e);
+            return null;
+        }
         String[] strings = urlContent.toString().split("~");
         return new BigDecimal(strings[3]);
     }

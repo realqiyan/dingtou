@@ -4,7 +4,7 @@ function reloadData(){
     $.ajax({
       url: "/trade/conform",
       data: {
-        owner: "default",
+        owner: $("#owner").val(),
         time: new Date().getTime()
       },
       success: function( result ) {
@@ -20,7 +20,7 @@ function settlement(){
     $.ajax({
       url: "/trade/settlement",
       data: {
-        owner: "default",
+        owner: $("#owner").val(),
         time: new Date().getTime()
       },
       success: function( result ) {
@@ -34,7 +34,7 @@ function submitData(){
       method: 'POST',
       url: "/trade/buy",
       data: {
-        owner: "default",
+        owner: $("#owner").val(),
         orders: JSON.stringify(tradeData)
       },
       success: function( result ) {

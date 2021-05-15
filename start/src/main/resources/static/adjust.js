@@ -3,7 +3,7 @@ function submitData(){
       method: 'POST',
       url: "/trade/adjust",
       data: {
-        owner: "default",
+        owner: $("#owner").val(),
         type: $('#type').val(),
         code: $('#code').val(),
         tradeFee: $('#tradeFee').val(),
@@ -20,7 +20,7 @@ function redo(){
       method: 'GET',
       url: "/statistic",
       data: {
-        owner: "default"
+        owner: $("#owner").val()
       },
       success: function( result ) {
         $("#json").JSONView(result);

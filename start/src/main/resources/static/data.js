@@ -1,17 +1,15 @@
-var exportData;
 
 function exportData(){
     $.ajax({
       url: "/export",
       data: {
-        owner: "default",
+        owner: $("#owner").val(),
         time: new Date().getTime()
       },
       success: function( result ) {
-        exportData = result;
-        $("#json").JSONView(exportData);
+        $("#json").JSONView(result);
         $('#json').JSONView('toggle');
-        $('#importData').val(JSON.stringify(exportData))
+        $('#importData').val(JSON.stringify(result))
       }
     });
 }
@@ -21,7 +19,7 @@ function submitData(data){
       method: 'POST',
       url: "/import",
       data: {
-        owner: "default",
+        owner: $("#owner").val(),
         data: data
       },
       success: function( result ) {
@@ -45,6 +43,10 @@ $(function() {
 
     $('#submit-btn').on('click', function() {
         submitData($('#importData').val());
+    });
+
+    $('#reload-btn').on('click', function() {
+        exportData();
     });
 
     exportData();

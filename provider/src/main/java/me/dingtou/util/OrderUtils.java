@@ -24,11 +24,13 @@ public class OrderUtils {
     public static Date getNextTradeTime(Stock stock, Date now) {
         Date tradeTime = now;
         if (StockType.FUND.equals(stock.getType())) {
-            CronExpression cron = null;
             try {
-                cron = new CronExpression(stock.getTradeCfg().getTradeCron());
-                tradeTime = cron.getNextValidTimeAfter(now);
-            } catch (ParseException e) {
+                String tradeCron = stock.getTradeCfg().getTradeCron();
+                if (null != tradeCron) {
+                    CronExpression cron = new CronExpression(tradeCron);
+                    tradeTime = cron.getNextValidTimeAfter(now);
+                }
+            } catch (Exception e) {
                 tradeTime = now;
             }
         }

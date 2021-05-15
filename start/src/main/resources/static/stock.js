@@ -2,7 +2,7 @@ function reloadData(){
     $.ajax({
       url: "/stock/query",
       data: {
-        owner: "default",
+        owner: $("#owner").val(),
         time: new Date().getTime()
       },
       success: function( result ) {
@@ -17,7 +17,7 @@ function add(){
       method: 'GET',
       url: "/stock/add",
       data: {
-        owner: "default",
+        owner: $("#owner").val(),
         type: $('#type').val(),
         code: $('#code').val(),
         increment: $('#increment').val(),

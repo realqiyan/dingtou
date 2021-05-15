@@ -42,4 +42,9 @@ public enum Market {
     public String getCode() {
         return code;
     }
+
+    @Override
+    public String toString() {
+        return code;
+    }
 }

@@ -2,10 +2,7 @@ package me.dingtou.web;
 
 import com.alibaba.fastjson.JSON;
 import me.dingtou.constant.*;
-import me.dingtou.model.Order;
-import me.dingtou.model.Stock;
-import me.dingtou.model.StockPackage;
-import me.dingtou.model.TradeCfg;
+import me.dingtou.model.*;
 import me.dingtou.service.DataService;
 import me.dingtou.service.StockService;
 import me.dingtou.service.TradeService;
@@ -18,7 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
 
+import static java.math.BigDecimal.ROUND_DOWN;
 import static me.dingtou.strategy.trade.AverageValueTradeStrategy.AVERAGE_STRATEGY_KEY;
 import static me.dingtou.strategy.trade.AverageValueTradeStrategy.CURRENT_TARGET_VALUE_KEY;
 
@@ -113,6 +112,96 @@ public class ApiController {
         List<Stock> stockList = stockService.query(owner, stockType);
         return stockList;
     }
+
+
+    /**
+     * http://127.0.0.1:8080/stock/statistics?owner=allFund
+     *
+     * @param owner
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/stock/statistics", method = RequestMethod.GET)
+    public List<Asset> stockStatistics(@RequestParam(value = "owner", required = true, defaultValue = "default") String owner)
+            throws Exception {
+        List<Asset> assetList = stockService.statistics(owner);
+        return assetList;
+    }
+
+    /**
+     * http://127.0.0.1:8080/stock/statisticsDetailView?owner=allFund
+     *
+     * @param owner
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/stock/statisticsDetailView", method = RequestMethod.GET)
+    public List<ChartView> stockStatisticsDetailView(@RequestParam(value = "owner", required = true, defaultValue = "default") String owner)
+            throws Exception {
+        List<Asset> assetList = stockService.statistics(owner);
+        return assetList.stream()
+                .map(asset -> buildAssetChartView(asset))
+                .sorted(Comparator.comparing(ChartView::getName))
+                .collect(Collectors.toList());
+    }
+
+
+    /**
+     * http://127.0.0.1:8080/stock/statisticsCategoryView?owner=allFund
+     *
+     * @param owner
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/stock/statisticsCategoryView", method = RequestMethod.GET)
+    public List<ChartView> stockStatisticsCategoryView(@RequestParam(value = "owner", required = true, defaultValue = "default") String owner)
+            throws Exception {
+        List<Asset> assetList = stockService.statistics(owner);
+
+        // 分组
+        Map<String, List<Asset>> groupMap = assetList.stream().collect(Collectors.groupingBy(Asset::getCategory));
+
+        // 聚合数据
+        List<ChartView> categoryChartViewList = new ArrayList<>();
+        for (Iterator<Map.Entry<String, List<Asset>>> i = groupMap.entrySet().iterator(); i.hasNext(); ) {
+            Map.Entry<String, List<Asset>> next = i.next();
+            String category = next.getKey();
+            List<Asset> assets = next.getValue();
+
+            List<ChartView> children = new ArrayList<>();
+            BigDecimal totalRatio = BigDecimal.ZERO;
+            for (Asset asset : assets) {
+                totalRatio = totalRatio.add(asset.getRatio());
+                ChartView assetChartView = buildAssetChartView(asset);
+                assetChartView.setValue(asset.getRatio().multiply(BigDecimal.valueOf(8)).toPlainString());
+                children.add(assetChartView);
+            }
+            String ratio = totalRatio.multiply(BigDecimal.valueOf(100)).setScale(2, ROUND_DOWN).toPlainString();
+            ChartView categoryChartView = new ChartView();
+            categoryChartView.setName(category + '-' + ratio + '%');
+            categoryChartView.setValue(totalRatio.multiply(BigDecimal.valueOf(8)).toPlainString());
+            categoryChartView.setChildren(children);
+            categoryChartViewList.add(categoryChartView);
+        }
+        categoryChartViewList.sort(Comparator.comparing(ChartView::getName));
+
+        return categoryChartViewList;
+    }
+
+    /**
+     * 通过资产构建视图
+     *
+     * @param asset
+     * @return
+     */
+    private ChartView buildAssetChartView(Asset asset) {
+        ChartView chartView = new ChartView();
+        String ratio = asset.getRatio().multiply(BigDecimal.valueOf(100)).setScale(2, ROUND_DOWN).toPlainString();
+        chartView.setName(asset.getCategory() + '-' + asset.getName() + '-' + ratio + '%');
+        chartView.setValue(asset.getTotalFee().toPlainString());
+        return chartView;
+    }
+
 
     @RequestMapping(value = "/trade/conform", method = RequestMethod.GET)
     public List<Order> tradeConform(@RequestParam(value = "owner", required = true, defaultValue = "default") String owner)

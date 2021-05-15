@@ -34,4 +34,9 @@ public enum StockType {
     public String getCode() {
         return code;
     }
+
+    @Override
+    public String toString() {
+        return code;
+    }
 }

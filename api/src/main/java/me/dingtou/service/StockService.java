@@ -1,7 +1,7 @@
 package me.dingtou.service;
 
 import me.dingtou.constant.StockType;
-import me.dingtou.model.Order;
+import me.dingtou.model.Asset;
 import me.dingtou.model.Stock;
 
 import java.util.List;
@@ -59,4 +59,11 @@ public interface StockService {
     Stock query(String owner, StockType type, String code);
 
 
+    /**
+     * 统计资产占比
+     *
+     * @param owner
+     * @return
+     */
+    List<Asset> statistics(String owner);
 }

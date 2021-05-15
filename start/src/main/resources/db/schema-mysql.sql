@@ -35,9 +35,12 @@ CREATE TABLE `stock` (
   `amount` decimal(10,4) NOT NULL COMMENT '持有份额',
   `last_trade_time` date DEFAULT NULL,
   `trade_status` varchar(45) NOT NULL COMMENT '当前状态：结算中，结算完毕',
+  `name` varchar(45) DEFAULT NULL COMMENT '显示名',
+  `category` varchar(45) DEFAULT NULL COMMENT '分类 例如：大盘、小盘、价值、行业、香港、债券、货币等',
+  `sub_category` varchar(45) DEFAULT NULL COMMENT '子分类 例如：300指数、500指数、养老、医药、传媒等',
   `status` int NOT NULL DEFAULT '1' COMMENT '状态 0失效 1有效',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1362067770606362626 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1368151911726927974 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -63,7 +66,7 @@ CREATE TABLE `stock_order` (
   UNIQUE KEY `uk_stock_order_out_id` (`out_id`),
   KEY `stock_id` (`stock_id`),
   CONSTRAINT `stock_id` FOREIGN KEY (`stock_id`) REFERENCES `stock` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1362104835805044738 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1393613891028750339 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -75,4 +78,4 @@ CREATE TABLE `stock_order` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed
+-- Dump completed on 2021-05-16  1:14:59
