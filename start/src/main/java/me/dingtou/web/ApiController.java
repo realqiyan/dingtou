@@ -163,6 +163,7 @@ public class ApiController {
 
         // 聚合数据
         List<ChartView> categoryChartViewList = new ArrayList<>();
+        BigDecimal multiplicand = BigDecimal.valueOf(groupMap.size());
         for (Iterator<Map.Entry<String, List<Asset>>> i = groupMap.entrySet().iterator(); i.hasNext(); ) {
             Map.Entry<String, List<Asset>> next = i.next();
             String category = next.getKey();
@@ -173,13 +174,14 @@ public class ApiController {
             for (Asset asset : assets) {
                 totalRatio = totalRatio.add(asset.getRatio());
                 ChartView assetChartView = buildAssetChartView(asset);
-                assetChartView.setValue(asset.getRatio().multiply(BigDecimal.valueOf(8)).toPlainString());
+                assetChartView.setValue(asset.getRatio().multiply(multiplicand).toPlainString());
                 children.add(assetChartView);
             }
             String ratio = totalRatio.multiply(BigDecimal.valueOf(100)).setScale(2, ROUND_DOWN).toPlainString();
             ChartView categoryChartView = new ChartView();
             categoryChartView.setName(category + '-' + ratio + '%');
-            categoryChartView.setValue(totalRatio.multiply(BigDecimal.valueOf(8)).toPlainString());
+            String value = totalRatio.multiply(multiplicand).toPlainString();
+            categoryChartView.setValue(value);
             categoryChartView.setChildren(children);
             categoryChartViewList.add(categoryChartView);
         }
