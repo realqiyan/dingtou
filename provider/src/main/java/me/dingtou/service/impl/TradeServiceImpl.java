@@ -1,18 +1,27 @@
 package me.dingtou.service.impl;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import javax.annotation.Resource;
+
+import com.alibaba.fastjson.JSON;
+
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.google.common.collect.Lists;
 import me.dingtou.constant.StockType;
 import me.dingtou.constant.TradeStatus;
 import me.dingtou.manager.StockManager;
 import me.dingtou.manager.TradeManager;
 import me.dingtou.model.Order;
 import me.dingtou.model.Stock;
+import me.dingtou.model.StockOrder;
+import me.dingtou.result.AppPageResult;
 import me.dingtou.service.TradeService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
-
-import javax.annotation.Resource;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
 
 
 @Service
@@ -24,6 +33,7 @@ public class TradeServiceImpl implements TradeService {
 
     @Resource
     private TradeManager tradeManager;
+
 
     @Override
     public Order conform(String owner, StockType type, String code) {
@@ -58,6 +68,38 @@ public class TradeServiceImpl implements TradeService {
             result.addAll(settlement);
         }
         return result;
+    }
+
+    @Override
+    public int updateStockOrder(String owner, StockOrder stockOrder) {
+        return tradeManager.updateStockOrder(JSON.parseObject(JSON.toJSONString(stockOrder), me.dingtou.dataobject.StockOrder.class));
+    }
+
+    @Override
+    public int deleteStockOrder(String owner, Long id) {
+        return tradeManager.deleteStockOrder(id);
+    }
+
+    @Override
+    public AppPageResult<StockOrder> queryStockOrder(String owner, Long stockId, int current, int pageSize){
+        Stock stock = stockManager.queryById(stockId);
+
+        Integer count = Optional.ofNullable(stock)
+            .map(x->tradeManager.selectOrderCountByStockId(x.getId()))
+            .orElse(0);
+        if(count<=0){
+            return AppPageResult.success();
+        }
+        return Optional.ofNullable(stock)
+            .filter(x-> StringUtils.equals(x.getOwner(), owner))
+            .map(x->tradeManager.getStockOrder(stockId, current, pageSize))
+            .map(x->{
+                AppPageResult<StockOrder> result = AppPageResult.success(JSON.parseArray(JSON.toJSONString(x), StockOrder.class));
+                result.setTotal(count);
+                result.setCurrent(current);
+                result.setPageSize(pageSize);
+                return result; })
+            .orElse(AppPageResult.success());
     }
 
     @Override

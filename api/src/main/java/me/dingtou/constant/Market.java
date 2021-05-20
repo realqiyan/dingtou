@@ -9,24 +9,26 @@ public enum Market {
     /**
      * 上海交易所
      */
-    SH("sh"),
+    SH("sh", "上交所"),
     /**
      * 深圳交易所
      */
-    SZ("sz"),
+    SZ("sz", "深交所"),
     /**
      * 基金
      */
-    FUND("fund"),
+    FUND("fund", "场外基金"),
     /**
      * 香港交易所
      */
-    HK("hk");
+    HK("hk", "港交所");
 
     private final String code;
+    private final String name;
 
-    Market(String code) {
+    Market(String code, String name) {
         this.code = code;
+        this.name = name;
     }
 
     public static Market of(String code) {
@@ -41,6 +43,10 @@ public enum Market {
 
     public String getCode() {
         return code;
+    }
+
+    public String getName() {
+        return name;
     }
 
     @Override

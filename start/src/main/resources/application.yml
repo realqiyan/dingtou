@@ -1,13 +1,15 @@
+server:
+  port: 8091
+
 # 数据源配置
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     # schema: classpath:db/schema-mysql.sql
     # data: classpath:db/data-mysql.sql
-    url: jdbc:mysql://127.0.0.1:3306/dingtou?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=CONVERT_TO_NULL&serverTimezone=Asia/Shanghai&useSSL=false
-    username: dingtou
-    password: DingTou.Me
-
+    url: jdbc:mysql://127.0.0.1:6590/dingtou?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=CONVERT_TO_NULL&serverTimezone=Asia/Shanghai&useSSL=false
+    username:
+    password:
 
 
   # FREEMARKER (FreeMarkerAutoConfiguration)

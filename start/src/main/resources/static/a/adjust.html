@@ -1,0 +1,38 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
+    <meta charset="UTF-8">
+    <title>Adjust</title>
+    <link rel="stylesheet" href="jquery.jsonview.css"/>
+    <script type="text/javascript" src="jquery.min.js"></script>
+    <script type="text/javascript" src="jquery.jsonview.js"></script>
+    <script type="text/javascript" src="adjust.js"></script>
+</head>
+<body>
+<a href="index.html">Trade</a>
+<a href="stock.html">Stock</a>
+<a href="adjust.html">Adjust</a>
+<a href="data.html">Data</a>
+<a href="statistics.html">Statistics</a>
+<br/>
+Owner:<input id="owner" name="owner" type="text" value="default" style="width: 80px;">
+<br/>
+<h2>数据调整</h2>
+<button id="redo-btn">导入重新汇总</button>
+<br/>
+<select id="type" name="type">
+    <option value="">选择证券类型</option>
+    <option value="fund">场外基金</option>
+    <option value="stock">场内证券</option>
+</select>
+<input id="code" name="code" placeholder="证券代码：000001">
+<input id="tradeFee" name="tradeFee" placeholder="调整金额：1.5">
+<input id="tradeAmount" name="tradeAmount" placeholder="调整份额：1.0">
+<input id="tradeServiceFee" name="tradeServiceFee" placeholder="调整服务费：0.5">
+<button id="submit-btn">调整</button>
+<br/>
+<div id="json"></div>
+<br/>
+</body>
+</html>

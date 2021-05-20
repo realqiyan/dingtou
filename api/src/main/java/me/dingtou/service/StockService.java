@@ -37,6 +37,13 @@ public interface StockService {
      */
     List<Stock> query(String owner);
 
+    /**
+     * 查询证券
+     *
+     * @param id
+     * @return
+     */
+    Stock query(Long id);
 
     /**
      * 查询证券

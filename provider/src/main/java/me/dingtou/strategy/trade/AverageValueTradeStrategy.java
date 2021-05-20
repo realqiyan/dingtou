@@ -113,18 +113,23 @@ public class AverageValueTradeStrategy implements TradeStrategy {
         }
         attributes.put(PRE_TARGET_VALUE_KEY, currentTargetValue.toPlainString());
 
+        // 当前价格
+        BigDecimal currentPrice = priceManager.getCurrentPrice(stock);
+        stock.setCurrentPrice(currentPrice);
+
+        // 当前份额
+        BigDecimal amount = stock.getAmount();
+
+        // 当前价值
+        BigDecimal currentValue = amount.multiply(currentPrice);
+        currentValue = currentValue.setScale(2, RoundingMode.HALF_UP);
+        stock.setCurrentValue(currentValue);
+
         // 已经买过就跳过计算
         Date lastTradeTime = stock.getLastTradeTime();
         if (null != lastTradeTime && DateUtils.isSameDay(lastTradeTime, OrderUtils.getNextTradeTime(stock, date))) {
             return new TradeDetail(currentTargetValue, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
         }
-        // 当前价格
-        BigDecimal currentPrice = priceManager.getCurrentPrice(stock);
-        // 当前份额
-        BigDecimal amount = stock.getAmount();
-        // 当前价值
-        BigDecimal currentValue = amount.multiply(currentPrice);
-        currentValue = currentValue.setScale(2, RoundingMode.HALF_UP);
 
         // 翻倍策略
         Map<Integer, String> averageStrategy = new HashMap<>();

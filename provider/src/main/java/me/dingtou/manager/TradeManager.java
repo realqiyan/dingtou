@@ -1,5 +1,14 @@
 package me.dingtou.manager;
 
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.annotation.Resource;
+
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import me.dingtou.constant.StockType;
 import me.dingtou.constant.TradeStatus;
@@ -15,14 +24,6 @@ import me.dingtou.util.OrderUtils;
 import org.quartz.CronExpression;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.annotation.Resource;
-import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class TradeManager {
@@ -106,6 +107,43 @@ public class TradeManager {
         return stockOrders.stream()
                 .map(e -> OrderConvert.convert(stock, e))
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * 查询交易订单
+     *
+     * @param stockId
+     * @param current
+     * @param pageSize
+     * @return
+     */
+    public List<StockOrder> getStockOrder(Long stockId, int current, int pageSize) {
+        int start = (current-1)*pageSize;
+        return stockOrderDAO.selectByPage(stockId, start, pageSize);
+    }
+
+    /**
+     * 更新交易订单
+     * @param stockOrder
+     * @return
+     */
+    public int updateStockOrder(StockOrder stockOrder) {
+        return stockOrderDAO.updateById(stockOrder);
+    }
+
+    /**
+     * 删除交易订单
+     * @param id
+     * @return
+     */
+    public int deleteStockOrder(Long id) {
+        return stockOrderDAO.deleteById(id);
+    }
+
+    public Integer selectOrderCountByStockId(Long stockId) {
+        QueryWrapper<StockOrder> query = new QueryWrapper<StockOrder>();
+        query.eq("stock_id", stockId);
+        return stockOrderDAO.selectCount(query);
     }
 
     public void importOrder(Order order) {

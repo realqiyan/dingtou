@@ -78,4 +78,14 @@ CREATE TABLE `stock_order` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-05-16  1:14:59
+-- Dump completed
+
+DROP TABLE IF EXISTS `sys_user`;
+CREATE TABLE `sys_user` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(64) NOT NULL COMMENT '账号',
+  `password` varchar(256) NOT NULL COMMENT '密码',
+  `nickname` varchar(64) NOT NULL COMMENT '昵称',
+  `role` varchar(64) DEFAULT NULL COMMENT '邮箱',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4;

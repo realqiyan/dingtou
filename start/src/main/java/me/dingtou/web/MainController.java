@@ -18,10 +18,4 @@ public class MainController {
         response.sendRedirect("index.html");
     }
 
-//    @RequestMapping(value = "/trade", method = RequestMethod.GET)
-//    public String trade(Map<String, Object> map) throws Exception {
-//        map.put("time", System.currentTimeMillis());
-//        return "trade";
-//    }
-
 }

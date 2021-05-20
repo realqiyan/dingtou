@@ -9,16 +9,18 @@ public enum StockType {
     /**
      * 股票
      */
-    STOCK("stock"),
+    STOCK("stock", "场内证券"),
     /**
      * 场外基金
      */
-    FUND("fund");
+    FUND("fund", "场外基金");
 
     private final String code;
+    private final String name;
 
-    StockType(String code) {
+    StockType(String code, String name) {
         this.code = code;
+        this.name = name;
     }
 
     public static StockType of(String code) {
@@ -33,6 +35,10 @@ public enum StockType {
 
     public String getCode() {
         return code;
+    }
+
+    public String getName() {
+        return name;
     }
 
     @Override

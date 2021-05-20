@@ -28,6 +28,12 @@ public class StockServiceImpl implements StockService {
 
     @Override
     public Stock create(Stock stock) {
+        try {
+            //先用来校验证券配置信息是否正常
+            priceManager.getCurrentPrice(stock);
+        } catch (Exception e){
+            throw new RuntimeException("证券配置异常!");
+        }
         return stockManager.create(stock);
     }
 
@@ -39,6 +45,11 @@ public class StockServiceImpl implements StockService {
     @Override
     public List<Stock> query(String owner) {
         return stockManager.query(owner, null);
+    }
+
+    @Override
+    public Stock query(Long id) {
+        return stockManager.queryById(id);
     }
 
     @Override

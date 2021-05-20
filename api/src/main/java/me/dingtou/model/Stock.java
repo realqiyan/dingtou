@@ -1,10 +1,12 @@
 package me.dingtou.model;
 
+import lombok.Data;
 import me.dingtou.constant.Market;
 import me.dingtou.constant.Status;
 import me.dingtou.constant.StockType;
 import me.dingtou.constant.TradeStatus;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -13,7 +15,9 @@ import java.util.Date;
  *
  * @author yuanhongbo
  */
-public class Stock {
+@Data
+public class Stock implements Serializable {
+    private static final long serialVersionUID = 3743571947682876315L;
     /**
      * ID
      */
@@ -26,6 +30,14 @@ public class Stock {
      * 股票基金名字
      */
     private String name;
+    /**
+     * 当前价格
+     */
+    private BigDecimal currentPrice;
+    /**
+     * 当前价值
+     */
+    private BigDecimal currentValue;
     /**
      * 股票基金类型
      */
@@ -70,118 +82,10 @@ public class Stock {
      * 状态
      */
     private Status status;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public StockType getType() {
-        return type;
-    }
-
-    public void setType(StockType type) {
-        this.type = type;
-    }
-
-    public Market getMarket() {
-        return market;
-    }
-
-    public void setMarket(Market market) {
-        this.market = market;
-    }
-
-    public String getOwner() {
-        return owner;
-    }
-
-    public void setOwner(String owner) {
-        this.owner = owner;
-    }
-
-    public TradeCfg getTradeCfg() {
-        return tradeCfg;
-    }
-
-    public void setTradeCfg(TradeCfg tradeCfg) {
-        this.tradeCfg = tradeCfg;
-    }
-
-    public BigDecimal getTotalFee() {
-        return totalFee;
-    }
-
-    public void setTotalFee(BigDecimal totalFee) {
-        this.totalFee = totalFee;
-    }
-
-    public BigDecimal getAmount() {
-        return amount;
-    }
-
-    public void setAmount(BigDecimal amount) {
-        this.amount = amount;
-    }
-
-    public Date getLastTradeTime() {
-        return lastTradeTime;
-    }
-
-    public void setLastTradeTime(Date lastTradeTime) {
-        this.lastTradeTime = lastTradeTime;
-    }
-
-    public TradeStatus getTradeStatus() {
-        return tradeStatus;
-    }
-
-    public void setTradeStatus(TradeStatus tradeStatus) {
-        this.tradeStatus = tradeStatus;
-    }
-
-    public String getCategory() {
-        return category;
-    }
-
-    public void setCategory(String category) {
-        this.category = category;
-    }
-
-    public String getSubCategory() {
-        return subCategory;
-    }
-
-    public void setSubCategory(String subCategory) {
-        this.subCategory = subCategory;
-    }
-
-    public Status getStatus() {
-        return status;
-    }
-
-    public void setStatus(Status status) {
-        this.status = status;
-    }
+    /**
+     * 标注
+     */
+    private String marks;
 
     public String getStockUniqueKey() {
         return String.format("%s_%s_%s", this.type, this.market, this.code);

@@ -1,27 +1,47 @@
 package me.dingtou.web;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import com.alibaba.fastjson.JSON;
-import me.dingtou.constant.*;
-import me.dingtou.model.*;
+
+import me.dingtou.constant.Market;
+import me.dingtou.constant.Status;
+import me.dingtou.constant.StockType;
+import me.dingtou.constant.TradeStatus;
+import me.dingtou.constant.TradeType;
+import me.dingtou.login.utils.UserUtils;
+import me.dingtou.model.Asset;
+import me.dingtou.model.ChartView;
+import me.dingtou.model.Order;
+import me.dingtou.model.Stock;
+import me.dingtou.model.StockPackage;
+import me.dingtou.model.TradeCfg;
 import me.dingtou.service.DataService;
 import me.dingtou.service.StockService;
 import me.dingtou.service.TradeService;
 import me.dingtou.strategy.trade.AverageValueTradeStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.math.BigDecimal;
-import java.util.*;
-import java.util.stream.Collectors;
-
 import static java.math.BigDecimal.ROUND_DOWN;
 import static me.dingtou.strategy.trade.AverageValueTradeStrategy.AVERAGE_STRATEGY_KEY;
 import static me.dingtou.strategy.trade.AverageValueTradeStrategy.CURRENT_TARGET_VALUE_KEY;
 
-@RestController
+@RestController()
+@Component
 public class ApiController {
 
     @Autowired
@@ -43,7 +63,6 @@ public class ApiController {
      * http://127.0.0.1:8080/stock/add?type=stock&code=515180&increment=500&serviceFeeRate=0.0001&minServiceFee=0.2&market=sh&minTradeAmount=100
      * </pre>
      *
-     * @param owner
      * @param type
      * @param code
      * @param serviceFeeRate
@@ -52,17 +71,22 @@ public class ApiController {
      * @throws Exception
      */
     @RequestMapping(value = "/stock/add", method = RequestMethod.GET)
-    public Stock addStock(@RequestParam(value = "owner", required = false, defaultValue = "default") String owner,
+    public Stock addStock(
                           @RequestParam(value = "type", required = true) String type,
                           @RequestParam(value = "code", required = true) String code,
+                          @RequestParam(value = "name", required = true) String name,
+                          @RequestParam(value = "category", required = true) String category,
                           @RequestParam(value = "market", required = true) String market,
                           @RequestParam(value = "increment", required = true) String increment,
                           @RequestParam(value = "serviceFeeRate", required = true) String serviceFeeRate,
                           @RequestParam(value = "minServiceFee", required = true) String minServiceFee,
                           @RequestParam(value = "minTradeAmount", required = true) String minTradeAmount)
             throws Exception {
+        String owner = UserUtils.userName();
         Stock stock = new Stock();
+        stock.setName(name);
         stock.setOwner(owner);
+        stock.setCategory(category);
         stock.setType(StockType.of(type));
         stock.setCode(code);
         stock.setMarket(Market.of(market));
@@ -102,9 +126,9 @@ public class ApiController {
     }
 
     @RequestMapping(value = "/stock/query", method = RequestMethod.GET)
-    public List<Stock> queryStock(@RequestParam(value = "owner", required = true, defaultValue = "default") String owner,
-                                  @RequestParam(value = "type", required = false) String type)
+    public List<Stock> queryStock(@RequestParam(value = "type", required = false) String type)
             throws Exception {
+        String owner = UserUtils.userName();
         StockType stockType = null;
         if (null != type) {
             stockType = StockType.of(type);
@@ -131,13 +155,12 @@ public class ApiController {
     /**
      * http://127.0.0.1:8080/stock/statisticsDetailView?owner=allFund
      *
-     * @param owner
      * @return
      * @throws Exception
      */
     @RequestMapping(value = "/stock/statisticsDetailView", method = RequestMethod.GET)
-    public List<ChartView> stockStatisticsDetailView(@RequestParam(value = "owner", required = true, defaultValue = "default") String owner)
-            throws Exception {
+    public List<ChartView> stockStatisticsDetailView() throws Exception {
+        String owner = UserUtils.userName();
         List<Asset> assetList = stockService.statistics(owner);
         return assetList.stream()
                 .map(asset -> buildAssetChartView(asset))
@@ -149,13 +172,12 @@ public class ApiController {
     /**
      * http://127.0.0.1:8080/stock/statisticsCategoryView?owner=allFund
      *
-     * @param owner
      * @return
      * @throws Exception
      */
     @RequestMapping(value = "/stock/statisticsCategoryView", method = RequestMethod.GET)
-    public List<ChartView> stockStatisticsCategoryView(@RequestParam(value = "owner", required = true, defaultValue = "default") String owner)
-            throws Exception {
+    public List<ChartView> stockStatisticsCategoryView() throws Exception {
+        String owner = UserUtils.userName();
         List<Asset> assetList = stockService.statistics(owner);
 
         // 分组
@@ -206,8 +228,9 @@ public class ApiController {
 
 
     @RequestMapping(value = "/trade/conform", method = RequestMethod.GET)
-    public List<Order> tradeConform(@RequestParam(value = "owner", required = true, defaultValue = "default") String owner)
+    public List<Order> tradeConform()
             throws Exception {
+        String owner = UserUtils.userName();
         try {
             tradeService.settlement(owner);
         } catch (Throwable t) {
@@ -226,9 +249,9 @@ public class ApiController {
     }
 
     @RequestMapping(value = "/trade/buy", method = RequestMethod.POST)
-    public List<Order> tradeBuy(@RequestParam(value = "owner", required = true, defaultValue = "default") String owner,
-                                @RequestParam(value = "orders", required = true) String orders)
+    public List<Order> tradeBuy(@RequestParam(value = "orders", required = true) String orders)
             throws Exception {
+        String owner = UserUtils.userName();
         List<Order> orderList = JSON.parseArray(orders, Order.class);
 
         List<Order> resultOrders = new ArrayList<>();
@@ -243,13 +266,13 @@ public class ApiController {
     }
 
     @RequestMapping(value = "/trade/adjust", method = RequestMethod.POST)
-    public Order tradeAdjust(@RequestParam(value = "owner", required = true, defaultValue = "default") String owner,
-                             @RequestParam(value = "type", required = true) String type,
+    public Order tradeAdjust(@RequestParam(value = "type", required = true) String type,
                              @RequestParam(value = "code", required = true) String code,
                              @RequestParam(value = "tradeFee", required = true) String tradeFeeInput,
                              @RequestParam(value = "tradeAmount", required = true) String tradeAmountInput,
                              @RequestParam(value = "tradeServiceFee", required = true) String tradeServiceFeeInput)
             throws Exception {
+        String owner = UserUtils.userName();
         BigDecimal tradeFee = new BigDecimal(tradeFeeInput);
         BigDecimal tradeAmount = new BigDecimal(tradeAmountInput);
         BigDecimal tradeServiceFee = new BigDecimal(tradeServiceFeeInput);
@@ -273,20 +296,23 @@ public class ApiController {
     }
 
     @RequestMapping(value = "/trade/settlement", method = RequestMethod.GET)
-    public List<Order> tradeSettlement(@RequestParam(value = "owner", required = true, defaultValue = "default") String owner)
+    public List<Order> tradeSettlement()
             throws Exception {
+        String owner = UserUtils.userName();
         return tradeService.settlement(owner);
     }
 
     @RequestMapping(value = "/statistic", method = RequestMethod.GET)
-    public Boolean redoStatistic(@RequestParam(value = "owner", required = true, defaultValue = "default") String owner)
+    public Boolean redoStatistic()
             throws Exception {
+        String owner = UserUtils.userName();
         return tradeService.statistic(owner);
     }
 
     @RequestMapping(value = "/export", method = RequestMethod.GET)
-    public StockPackage exportData(@RequestParam(value = "owner", required = true, defaultValue = "default") String owner)
+    public StockPackage exportData()
             throws Exception {
+        String owner = UserUtils.userName();
         return dataService.exportData(owner);
     }
 
