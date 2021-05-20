@@ -25,6 +25,7 @@ hs_err_pid*
 HELP.md
 target/
 .mvn/
+.umi/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
