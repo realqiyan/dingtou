@@ -45,6 +45,20 @@ public class AverageValueTradeStrategy implements TradeStrategy {
      * 当前目标价值
      */
     public static final String CURRENT_TARGET_VALUE_KEY = "currentTargetValue";
+    /**
+     * 上一期目标价值
+     */
+    public static final String PRE_TARGET_VALUE_KEY = "preTargetValue";
+
+    /**
+     * 目标指数编码
+     */
+    public static final String TARGET_INDEX_CODE = "targetIndexCode";
+
+    /**
+     * 目标指数估值
+     */
+    public static final String CURRENT_TARGET_INDEX_VALUATION = "currentTargetIndexValuation";
 
     /**
      * 最大目标价值
@@ -97,6 +111,8 @@ public class AverageValueTradeStrategy implements TradeStrategy {
         if (attributes.containsKey(CURRENT_TARGET_VALUE_KEY)) {
             currentTargetValue = new BigDecimal(attributes.get(CURRENT_TARGET_VALUE_KEY));
         }
+        attributes.put(PRE_TARGET_VALUE_KEY, currentTargetValue.toPlainString());
+
         // 已经买过就跳过计算
         Date lastTradeTime = stock.getLastTradeTime();
         if (null != lastTradeTime && DateUtils.isSameDay(lastTradeTime, OrderUtils.getNextTradeTime(stock, date))) {
@@ -124,33 +140,8 @@ public class AverageValueTradeStrategy implements TradeStrategy {
         }
         attributes.put(AVERAGE_STRATEGY_KEY, JSON.toJSONString(averageStrategy));
 
-        // 默认步长
-        BigDecimal increment = tradeCfg.getIncrement();
-        Date now = new Date();
-        // 计算均线平均价格
-        int strategySize = averageStrategy.size();
-        // 均线&价格
-        final Map<Integer, BigDecimal> average = new HashMap<>(strategySize);
-        for (Iterator<Integer> i = averageStrategy.keySet().iterator(); i.hasNext(); ) {
-            Integer averageVal = i.next();
-            average.put(averageVal, priceManager.getSmaPrice(stock, now, averageVal));
-        }
-
-        // 优先使用长期均线比较，优先使用长期均线价格
-        List<Integer> averageDays = Lists.newArrayList(average.keySet().iterator());
-        Collections.sort(averageDays, Comparator.reverseOrder());
-        for (Integer averageVal : averageDays) {
-            BigDecimal linePrice = average.get(averageVal);
-            // 配置0日均线代表调整默认倍率（默认倍率1）
-            if (averageVal.intValue() != 0 && currentPrice.doubleValue() >= linePrice.doubleValue()) {
-                continue;
-            }
-            // 均线&倍率
-            String multiplyVal = averageStrategy.get(averageVal);
-            log.info("stock:{},averageDay:{},multiplyVal:{}", stock.getCode(), averageVal, multiplyVal);
-            increment = increment.multiply(new BigDecimal(multiplyVal));
-            break;
-        }
+        // 计算步长
+        BigDecimal increment = calculateIncrement(stock, currentPrice, averageStrategy);
 
         // 目标价值=上期目标价值+increment
         BigDecimal targetValue = currentTargetValue.add(increment);
@@ -204,6 +195,70 @@ public class AverageValueTradeStrategy implements TradeStrategy {
             }
         }
         return new TradeDetail(targetValue, tradeFee, tradeAmount, tradeServiceFee);
+    }
+
+    /**
+     * 计算下一期买入金额
+     *
+     * @param stock
+     * @param currentPrice
+     * @param averageStrategy
+     * @return
+     */
+    private BigDecimal calculateIncrement(Stock stock, BigDecimal currentPrice, Map<Integer, String> averageStrategy) {
+        TradeCfg tradeCfg = stock.getTradeCfg();
+        // 默认步长
+        BigDecimal increment = tradeCfg.getIncrement();
+
+        // 跟踪的指数估值
+        String targetIndexCode = tradeCfg.getAttributes().get(TARGET_INDEX_CODE);
+        if (null != targetIndexCode) {
+            BigDecimal indexValuationRatio = priceManager.getIndexValuationRatio(targetIndexCode);
+            if (null != indexValuationRatio) {
+                tradeCfg.getAttributes().put(CURRENT_TARGET_INDEX_VALUATION, indexValuationRatio.toPlainString());
+                // 估值水位80%～100% 0倍
+                // 估值水位60%～80%  0.5倍
+                // 估值水位20%～60%  1倍
+                // 估值水位 0%～20%  1.5倍
+                if (indexValuationRatio.doubleValue() > 0.8) {
+                    increment = BigDecimal.ZERO;
+                } else if (indexValuationRatio.doubleValue() > 0.6) {
+                    increment = increment.multiply(new BigDecimal("0.5"));
+                } else if (indexValuationRatio.doubleValue() > 0.2) {
+                    increment = increment.multiply(new BigDecimal("1"));
+                } else if (indexValuationRatio.doubleValue() >= 0.0) {
+                    increment = increment.multiply(new BigDecimal("1.5"));
+                }
+            }
+        }
+
+
+        Date now = new Date();
+        // 计算均线平均价格
+        int strategySize = averageStrategy.size();
+        // 均线&价格
+        final Map<Integer, BigDecimal> average = new HashMap<>(strategySize);
+        for (Iterator<Integer> i = averageStrategy.keySet().iterator(); i.hasNext(); ) {
+            Integer averageVal = i.next();
+            average.put(averageVal, priceManager.getSmaPrice(stock, now, averageVal));
+        }
+
+        // 优先使用长期均线比较，优先使用长期均线价格
+        List<Integer> averageDays = Lists.newArrayList(average.keySet().iterator());
+        Collections.sort(averageDays, Comparator.reverseOrder());
+        for (Integer averageVal : averageDays) {
+            BigDecimal linePrice = average.get(averageVal);
+            // 配置0日均线代表调整默认倍率（默认倍率1）
+            if (averageVal.intValue() != 0 && currentPrice.doubleValue() >= linePrice.doubleValue()) {
+                continue;
+            }
+            // 均线&倍率
+            String multiplyVal = averageStrategy.get(averageVal);
+            log.info("stock:{},averageDay:{},multiplyVal:{}", stock.getCode(), averageVal, multiplyVal);
+            increment = increment.multiply(new BigDecimal(multiplyVal));
+            break;
+        }
+        return increment;
     }
 
     @Override

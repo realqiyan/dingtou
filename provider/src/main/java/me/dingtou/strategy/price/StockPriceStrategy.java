@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import me.dingtou.constant.Market;
 import me.dingtou.model.Stock;
 import me.dingtou.model.StockPrice;
+import me.dingtou.util.HttpClients;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -88,7 +89,7 @@ public class StockPriceStrategy extends BasePriceStrategy {
     private BigDecimal getStockPrice(String url) {
         StringBuffer urlContent = null;
         try {
-            urlContent = cache.get(url, () -> getUrlContent(url));
+            urlContent = cache.get(url, () -> HttpClients.getUrlContent(url));
         } catch (ExecutionException e) {
             log.error("getUrlContent error.url:" + url, e);
             return null;
@@ -100,7 +101,7 @@ public class StockPriceStrategy extends BasePriceStrategy {
     private List<StockPrice> pullStockPrice(Stock stock, String url) {
         try {
             List<StockPrice> prices = new ArrayList<StockPrice>();
-            StringBuffer content = getUrlContent(url);
+            StringBuffer content = HttpClients.getUrlContent(url);
             JSONArray priceList = JSON.parseArray(content.toString());
             if (null != priceList) {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");

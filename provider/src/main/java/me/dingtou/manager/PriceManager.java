@@ -1,8 +1,11 @@
 package me.dingtou.manager;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import me.dingtou.model.Stock;
 import me.dingtou.model.StockPrice;
 import me.dingtou.strategy.PriceStrategy;
+import me.dingtou.util.HttpClients;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -94,4 +97,23 @@ public class PriceManager {
         throw new NullPointerException("PriceStrategy not found. ");
     }
 
+    /**
+     * 拉取指数估值比例
+     *
+     * @param targetIndexCode
+     * @return
+     */
+    public BigDecimal getIndexValuationRatio(String targetIndexCode) {
+        if (null == targetIndexCode) {
+            return null;
+        }
+        String url = String.format("https://danjuanapp.com/djapi/index_eva/detail/%s", targetIndexCode.trim().toUpperCase());
+        StringBuffer content = HttpClients.getUrlContent(url);
+        JSONObject jsonObject = JSON.parseObject(content.toString());
+        JSONObject data = jsonObject.getJSONObject("data");
+        if (null == data) {
+            return null;
+        }
+        return data.getBigDecimal("pe_percentile");
+    }
 }

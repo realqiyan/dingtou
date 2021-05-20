@@ -58,32 +58,4 @@ public abstract class BasePriceStrategy implements PriceStrategy {
      */
     protected abstract List<StockPrice> pullPrices(Stock stock, Date date, int x);
 
-    /**
-     * 获取开放股票基金数据
-     *
-     * @param url
-     * @return
-     */
-    protected StringBuffer getUrlContent(String url) {
-        try {
-            URL urlObj = new URL(url);
-            InputStream inputStream = urlObj.openConnection().getInputStream();
-            StringBuffer content = new StringBuffer();
-            try {
-                BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
-                String line;
-                while ((line = br.readLine()) != null) {
-                    content.append(line);
-                }
-                br.close();
-            } finally {
-                if (null != inputStream) {
-                    inputStream.close();
-                }
-            }
-            return content;
-        } catch (Exception e) {
-            return null;
-        }
-    }
 }
