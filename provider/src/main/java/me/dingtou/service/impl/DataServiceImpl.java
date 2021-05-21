@@ -36,6 +36,13 @@ public class DataServiceImpl implements DataService {
             if (null == stockOrder || stockOrder.isEmpty()) {
                 continue;
             }
+            stockOrder.stream().forEach(e->{
+                Stock orderStock = e.getStock();
+                Stock dataStock = new Stock();
+                dataStock.setId(orderStock.getId());
+                dataStock.setCode(orderStock.getCode());
+                e.setStock(dataStock);
+            });
             orders.addAll(stockOrder);
         }
         stockPackage.setOrders(orders);

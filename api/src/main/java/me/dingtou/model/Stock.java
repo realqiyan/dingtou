@@ -184,6 +184,9 @@ public class Stock {
     }
 
     public String getStockUniqueKey() {
+        if (null == this.type || null == this.market || null == this.code) {
+            return null;
+        }
         return String.format("%s_%s_%s", this.type, this.market, this.code);
     }
 }
