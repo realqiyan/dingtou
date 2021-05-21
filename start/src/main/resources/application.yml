@@ -37,7 +37,7 @@ spring:
 me:
   dingtou:
     login:
-      needLogin: true
+      needLogin: false
       loginUrl: https://github.com/login/oauth/authorize?client_id=700a1ae2a42328279390
       secretKey: d7edf5704cae2e5105b2c99d6a4e32b655c36f8a3ae2dcc22ea4e7df1be8803e
     oauth:
