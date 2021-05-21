@@ -33,3 +33,15 @@ spring:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: Asia/Shanghai
     default-property-inclusion: non_null
+
+me:
+  dingtou:
+    login:
+      needLogin: true
+      loginUrl: https://github.com/login/oauth/authorize?client_id=700a1ae2a42328279390
+      secretKey: d7edf5704cae2e5105b2c99d6a4e32b655c36f8a3ae2dcc22ea4e7df1be8803e
+    oauth:
+      github:
+        client_id: 700a1ae2a42328279390
+        client_secret: bdca3d91e0867d5a1c4bbf01dc61a1f22a18eeff
+        redirect_uri: https://dingtoume.cn/login/oauth_github

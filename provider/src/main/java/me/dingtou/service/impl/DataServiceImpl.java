@@ -10,7 +10,9 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class DataServiceImpl implements DataService {
@@ -36,7 +38,7 @@ public class DataServiceImpl implements DataService {
             if (null == stockOrder || stockOrder.isEmpty()) {
                 continue;
             }
-            stockOrder.stream().forEach(e->{
+            stockOrder.stream().forEach(e -> {
                 Stock orderStock = e.getStock();
                 Stock dataStock = new Stock();
                 dataStock.setId(orderStock.getId());
@@ -56,19 +58,36 @@ public class DataServiceImpl implements DataService {
         }
 
         List<Stock> stocks = data.getStocks();
+        Map<Long, Long> idMapping = new HashMap<>(stocks.size(), 1.0f);
         if (null != stocks) {
             for (Stock stock : stocks) {
+                Long oldId = stock.getId();
                 Stock dbStock = stockManager.query(stock.getOwner(), stock.getType(), stock.getCode());
                 if (null != dbStock) {
+                    idMapping.put(oldId, dbStock.getId());
                     continue;
                 }
-                stockManager.create(stock);
+                // 重置ID
+                stock.setId(null);
+                Stock newStock = stockManager.create(stock);
+                if (null != newStock) {
+                    idMapping.put(oldId, newStock.getId());
+                }
             }
         }
 
         List<Order> orders = data.getOrders();
         if (null != orders) {
             for (Order order : orders) {
+                if (null == order || null == order.getStock()) {
+                    continue;
+                }
+                Long oldId = order.getStock().getId();
+                Long newId = idMapping.get(oldId);
+                if (null == newId) {
+                    continue;
+                }
+                order.getStock().setId(newId);
                 tradeManager.importOrder(order);
             }
         }

@@ -9,7 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import me.dingtou.constant.Market;
 import me.dingtou.model.Stock;
 import me.dingtou.model.StockPrice;
-import me.dingtou.util.HttpClients;
+import me.dingtou.util.StockInfoGetClients;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -19,7 +19,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -31,7 +30,7 @@ import java.util.stream.Collectors;
 public class StockPriceStrategy extends BasePriceStrategy {
 
     // 30秒缓存
-    private Cache<String, StringBuffer> cache = CacheBuilder.newBuilder()
+    private Cache<String, String> cache = CacheBuilder.newBuilder()
             .maximumSize(500)
             .expireAfterWrite(30, TimeUnit.SECONDS)
             .build();
@@ -87,22 +86,23 @@ public class StockPriceStrategy extends BasePriceStrategy {
 
 
     private BigDecimal getStockPrice(String url) {
-        StringBuffer urlContent = null;
+        String urlContent = null;
         try {
-            urlContent = cache.get(url, () -> HttpClients.getUrlContent(url));
-        } catch (ExecutionException e) {
+            urlContent = cache.get(url, () -> StockInfoGetClients.getUrlContent(url));
+            String[] strings = urlContent.split("~");
+            return new BigDecimal(strings[3]);
+        } catch (Exception e) {
             log.error("getUrlContent error.url:" + url, e);
             return null;
         }
-        String[] strings = urlContent.toString().split("~");
-        return new BigDecimal(strings[3]);
+
     }
 
     private List<StockPrice> pullStockPrice(Stock stock, String url) {
         try {
             List<StockPrice> prices = new ArrayList<StockPrice>();
-            StringBuffer content = HttpClients.getUrlContent(url);
-            JSONArray priceList = JSON.parseArray(content.toString());
+            String content = StockInfoGetClients.getUrlContent(url);
+            JSONArray priceList = JSON.parseArray(content);
             if (null != priceList) {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                 priceList.stream().forEach(data -> {

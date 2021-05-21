@@ -9,7 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import me.dingtou.constant.Market;
 import me.dingtou.model.Stock;
 import me.dingtou.model.StockPrice;
-import me.dingtou.util.HttpClients;
+import me.dingtou.util.StockInfoGetClients;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.stereotype.Component;
@@ -77,8 +77,8 @@ public class FundPriceStrategy extends BasePriceStrategy {
             long between = Math.abs(ChronoUnit.DAYS.between(now.toInstant(), date.toInstant()));
             x += between;
             List<StockPrice> prices = new ArrayList<StockPrice>();
-            StringBuffer content = HttpClients.getUrlContent(String.format("https://fundmobapi.eastmoney.com/FundMApi/FundNetDiagram.ashx?deviceid=h5&version=1.2&product=EFund&plat=Wap&FCODE=%s&pageIndex=1&pageSize=%s&_=%s", stock.getCode(), x, System.currentTimeMillis()));
-            JSONObject fundData = JSON.parseObject(content.toString());
+            String content = StockInfoGetClients.getUrlContent(String.format("https://fundmobapi.eastmoney.com/FundMApi/FundNetDiagram.ashx?deviceid=h5&version=1.2&product=EFund&plat=Wap&FCODE=%s&pageIndex=1&pageSize=%s&_=%s", stock.getCode(), x, System.currentTimeMillis()));
+            JSONObject fundData = JSON.parseObject(content);
             JSONArray datas = fundData.getJSONArray("Datas");
             if (null != datas) {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -110,8 +110,8 @@ public class FundPriceStrategy extends BasePriceStrategy {
     private BigDecimal getCurrentFundPrice(Stock stock) {
         try {
             String url = String.format("https://fundmobapi.eastmoney.com/FundMApi/FundBasicInformation.ashx?FCODE=%s&deviceid=h5&plat=Wap&product=EFund&version=1.2", stock.getCode());
-            StringBuffer content = HttpClients.getUrlContent(url);
-            JSONObject fundData = JSON.parseObject(content.toString());
+            String content = StockInfoGetClients.getUrlContent(url);
+            JSONObject fundData = JSON.parseObject(content);
             JSONObject data = fundData.getJSONObject("Datas");
             String price = data.getString("DWJZ");
             Date fsrq = data.getDate("FSRQ");
@@ -121,8 +121,8 @@ public class FundPriceStrategy extends BasePriceStrategy {
                 fsrq = new Date();
             }
             url = String.format("https://fundmobapi.eastmoney.com/FundMApi/FundVarietieValuationDetail.ashx?FCODE=%s&deviceid=h5&plat=Wap&product=EFund&version=1.2", stock.getCode());
-            content = HttpClients.getUrlContent(url);
-            fundData = JSON.parseObject(content.toString());
+            content = StockInfoGetClients.getUrlContent(url);
+            fundData = JSON.parseObject(content);
             JSONObject expansion = fundData.getJSONObject("Expansion");
             String gz = expansion.getString("GZ");
             if (StringUtils.isBlank(gz)) {

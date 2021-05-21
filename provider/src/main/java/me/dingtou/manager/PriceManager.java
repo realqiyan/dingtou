@@ -5,7 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import me.dingtou.model.Stock;
 import me.dingtou.model.StockPrice;
 import me.dingtou.strategy.PriceStrategy;
-import me.dingtou.util.HttpClients;
+import me.dingtou.util.StockInfoGetClients;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -108,8 +108,8 @@ public class PriceManager {
             return null;
         }
         String url = String.format("https://danjuanapp.com/djapi/index_eva/detail/%s", targetIndexCode.trim().toUpperCase());
-        StringBuffer content = HttpClients.getUrlContent(url);
-        JSONObject jsonObject = JSON.parseObject(content.toString());
+        String content = StockInfoGetClients.getUrlContent(url);
+        JSONObject jsonObject = JSON.parseObject(content);
         JSONObject data = jsonObject.getJSONObject("data");
         if (null == data) {
             return null;
