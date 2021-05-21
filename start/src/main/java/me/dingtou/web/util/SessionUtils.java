@@ -55,6 +55,9 @@ public class SessionUtils {
      * @return
      */
     public static Cookie buildCookie(String secretKey, LoginUser loginUser) {
+        if (null == loginUser) {
+            return null;
+        }
         String jwt = buildJwt(secretKey, loginUser);
         Cookie cookie = new Cookie(JWT, jwt);
         cookie.setSecure(true);

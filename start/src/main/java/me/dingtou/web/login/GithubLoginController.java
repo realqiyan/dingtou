@@ -52,9 +52,16 @@ public class GithubLoginController {
     public void githubLogin(@RequestParam(value = "code", required = true) String code, HttpServletResponse response) throws Exception {
         String accessToken = getAccessToken(code);
         LoginUser loginUser = getGithubUser(accessToken);
-        Cookie cookie = SessionUtils.buildCookie(secretKey, loginUser);
-        response.addCookie(cookie);
-        response.sendRedirect("/");
+        if (null != loginUser) {
+            Cookie cookie = SessionUtils.buildCookie(secretKey, loginUser);
+            if (null != cookie) {
+                response.addCookie(cookie);
+                response.sendRedirect("/");
+                return;
+            }
+        }
+        response.sendRedirect("/login/error.html");
+
     }
 
     /**
