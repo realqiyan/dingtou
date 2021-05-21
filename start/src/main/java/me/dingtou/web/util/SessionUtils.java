@@ -72,6 +72,9 @@ public class SessionUtils {
      * @return
      */
     public static LoginUser parseCookie(String secretKey, Cookie[] cookies) {
+        if (null == secretKey || null == cookies || cookies.length == 0) {
+            return null;
+        }
         for (Cookie cookie : cookies) {
             if (JWT.equals(cookie.getName())) {
                 return parseJwt(secretKey, cookie.getValue());
