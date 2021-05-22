@@ -1,22 +1,72 @@
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
-    <meta charset="UTF-8">
-    <title>Adjust</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>dingtoume.cn</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.1/dist/css/adminlte.min.css">
     <link rel="stylesheet" href="jquery.jsonview.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.1/dist/js/adminlte.min.js"></script>
     <script type="text/javascript" src="jquery.min.js"></script>
     <script type="text/javascript" src="jquery.jsonview.js"></script>
-    <script type="text/javascript" src="adjust.js"></script>
+    <script type="text/javascript" src="index.js"></script>
 </head>
-<body>
-<a href="../index.html">Trade</a>
-<a href="../stock.html">Stock</a>
-<a href="../adjust.html">Adjust</a>
-<a href="../data.html">Data</a>
-<a href="../statistics.html">Statistics</a>
-<br/>
-<div id="json">登陆失败</div>
-<br/>
+<body class="sidebar-mini skin-black-light">
+<div class="wrapper">
+    <!-- 导航 -->
+    <aside class="main-sidebar sidebar-dark-primary elevation-4">
+        <div class="sidebar">
+            <nav class="mt-2">
+                <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
+                    data-accordion="false">
+                    <li class="nav-item">
+                        <a href="index.html" class="nav-link active">Trade</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="stock.html" class="nav-link">Stock</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="adjust.html" class="nav-link">Adjust</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="data.html" class="nav-link">Data</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="statistics.html" class="nav-link">Statistics</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </aside>
+
+    <!-- 内容 -->
+    <div class="content-wrapper">
+        <div class="content-header">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-sm-6">
+                        <h1 class="m-0">登陆失败</h1>
+                    </div><!-- /.col -->
+                </div><!-- /.row -->
+            </div><!-- /.container-fluid -->
+        </div>
+
+        <div class="content">
+            <div class="container-fluid">
+                <div class="row">
+                    登陆失败，请重试。
+                </div>
+                <!-- /.row -->
+            </div><!-- /.container-fluid -->
+        </div>
+        <!-- /.content -->
+    </div>
+    <!-- /.content-wrapper -->
+
+    <!-- Main Footer -->
+    <footer class="main-footer">
+        <strong>Copyright &copy; 2021 <a href="https://dingtoume.cn">dingtoume.cn</a>.</strong> All rights reserved.
+    </footer>
+</div>
 </body>
 </html>

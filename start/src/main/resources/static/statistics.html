@@ -1,26 +1,77 @@
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
-    <meta charset="UTF-8">
-    <title>Statistics</title>
-    <link rel="stylesheet" href="jquery.jsonview.css"/>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>dingtoume.cn</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.1/dist/css/adminlte.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/admin-lte@3.1/dist/js/adminlte.min.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts@5.1.1/dist/echarts.min.js"></script>
     <script type="text/javascript" src="jquery.min.js"></script>
-    <script type="text/javascript" src="jquery.jsonview.js"></script>
     <script type="text/javascript" src="statistics.js"></script>
 </head>
-<body>
-<a href="index.html">Trade</a>
-<a href="stock.html">Stock</a>
-<a href="adjust.html">Adjust</a>
-<a href="data.html">Data</a>
-<a href="statistics.html">Statistics</a>
-<br/>
-<h2>统计数据</h2>
-<button id="reload-sunburst-btn">加载统计</button>
-<button id="reload-detail-btn">加载明细</button>
-<br/>
-<div id="main" style="width: 1200px;height:700px;">加载中...</div>
+<body class="hold-transition sidebar-mini">
+<div class="wrapper">
+    <!-- 导航 -->
+    <aside class="main-sidebar sidebar-dark-primary elevation-4">
+        <div class="sidebar">
+            <nav class="mt-2">
+                <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
+                    data-accordion="false">
+                    <li class="nav-item">
+                        <a href="index.html" class="nav-link ">Trade</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="stock.html" class="nav-link ">Stock</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="adjust.html" class="nav-link ">Adjust</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="data.html" class="nav-link ">Data</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="statistics.html" class="nav-link active">Statistics</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </aside>
+
+    <!-- 内容 -->
+    <div class="content-wrapper">
+        <div class="content-header">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-sm-6">
+                        <h1 class="m-0">
+                            <h2>统计数据</h2>
+                        </h1>
+                    </div><!-- /.col -->
+                </div><!-- /.row -->
+            </div><!-- /.container-fluid -->
+        </div>
+
+        <div class="content">
+            <div class="container-fluid">
+                <div class="row">
+                    <button id="reload-sunburst-btn" class="btn btn-info">加载统计</button>
+                    <button id="reload-detail-btn" class="btn btn-info">加载明细</button>
+                </div>
+                <div class="row">
+                    <div id="main" style="width: 1200px;height:700px;">加载中...</div>
+                </div>
+                <!-- /.row -->
+            </div><!-- /.container-fluid -->
+        </div>
+        <!-- /.content -->
+    </div>
+    <!-- /.content-wrapper -->
+
+    <!-- Main Footer -->
+    <footer class="main-footer">
+        <strong>Copyright &copy; 2021 <a href="https://dingtoume.cn">dingtoume.cn</a>.</strong> All rights reserved.
+    </footer>
+</div>
 </body>
 </html>
