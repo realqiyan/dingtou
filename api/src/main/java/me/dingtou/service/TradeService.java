@@ -2,7 +2,6 @@ package me.dingtou.service;
 
 import me.dingtou.constant.StockType;
 import me.dingtou.model.Order;
-import me.dingtou.model.Stock;
 
 import java.util.List;
 
@@ -53,4 +52,12 @@ public interface TradeService {
      * @return
      */
     boolean statistic(String owner);
+
+    /**
+     * 自动生成调整单
+     *
+     * @param owner
+     * @return
+     */
+    List<Order> autoAdjust(String owner);
 }

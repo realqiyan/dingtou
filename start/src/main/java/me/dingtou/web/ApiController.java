@@ -252,7 +252,6 @@ public class ApiController {
         BigDecimal tradeFee = new BigDecimal(tradeFeeInput);
         BigDecimal tradeAmount = new BigDecimal(tradeAmountInput);
         BigDecimal tradeServiceFee = new BigDecimal(tradeServiceFeeInput);
-
         Stock stock = stockService.query(owner, StockType.of(type), code);
         if (null == stock) {
             return null;
@@ -271,13 +270,19 @@ public class ApiController {
         return tradeService.adjust(order);
     }
 
+    @RequestMapping(value = "/trade/auto-adjust", method = RequestMethod.POST)
+    public List<Order> tradeAutoAdjust() throws Exception {
+        String owner = SessionUtils.getCurrentOwner();
+        return tradeService.autoAdjust(owner);
+    }
+
     @RequestMapping(value = "/trade/settlement", method = RequestMethod.GET)
     public List<Order> tradeSettlement() throws Exception {
         String owner = SessionUtils.getCurrentOwner();
         return tradeService.settlement(owner);
     }
 
-    @RequestMapping(value = "/statistic", method = RequestMethod.GET)
+    @RequestMapping(value = "/trade/statistic", method = RequestMethod.GET)
     public Boolean redoStatistic() throws Exception {
         String owner = SessionUtils.getCurrentOwner();
         return tradeService.statistic(owner);

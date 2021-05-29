@@ -15,10 +15,23 @@ function submitData(){
       }
     });
 }
-function redo(){
+function redoStatistic(){
     $.ajax({
       method: 'GET',
-      url: "/statistic",
+      url: "/trade/statistic",
+      data: {
+        owner: $("#owner").val()
+      },
+      success: function( result ) {
+        $("#json").JSONView(result);
+      }
+    });
+}
+
+function redoAdjust(){
+    $.ajax({
+      method: 'POST',
+      url: "/trade/auto-adjust",
       data: {
         owner: $("#owner").val()
       },
@@ -33,7 +46,10 @@ $(function() {
         submitData();
     });
     $('#redo-btn').on('click', function() {
-        redo();
+        redoStatistic();
+    });
+    $('#build-adjust-btn').on('click', function() {
+        redoAdjust();
     });
 
 });

@@ -2,6 +2,7 @@ package me.dingtou.service.impl;
 
 import me.dingtou.constant.StockType;
 import me.dingtou.constant.TradeStatus;
+import me.dingtou.constant.TradeType;
 import me.dingtou.manager.StockManager;
 import me.dingtou.manager.TradeManager;
 import me.dingtou.model.Order;
@@ -12,6 +13,8 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 
@@ -85,5 +88,48 @@ public class TradeServiceImpl implements TradeService {
             stockManager.update(stock);
         }
         return true;
+    }
+
+    @Override
+    public List<Order> autoAdjust(String owner) {
+        List<Stock> stocks = stockManager.query(owner, null);
+        if (null == stocks || stocks.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<Order> adjustOrders = new ArrayList<>();
+        for (Stock stock : stocks) {
+            List<Order> stockOrder = tradeManager.getStockOrder(owner, stock.getType(), stock.getCode());
+            BigDecimal totalOrderTradeFee = BigDecimal.ZERO;
+            BigDecimal totalOrderTradeAmount = BigDecimal.ZERO;
+            if (null != stockOrder && !stockOrder.isEmpty()) {
+                for (Order order : stockOrder) {
+                    totalOrderTradeFee = totalOrderTradeFee.add(order.getTradeFee());
+                    totalOrderTradeAmount = totalOrderTradeAmount.add(order.getTradeAmount());
+                }
+            }
+            BigDecimal totalFee = stock.getTotalFee();
+            BigDecimal totalAmount = stock.getAmount();
+
+            BigDecimal adjustFee = totalFee.subtract(totalOrderTradeFee);
+            BigDecimal adjustAmount = totalAmount.subtract(totalOrderTradeAmount);
+            if (adjustFee.doubleValue() == 0.0 && adjustAmount.doubleValue() == 0.0) {
+                continue;
+            }
+
+            Order order = new Order();
+            order.setStock(stock);
+            order.setType(TradeType.ADJUST);
+            order.setStatus(TradeStatus.DONE);
+            Date now = new Date();
+            order.setTradeTime(now);
+            order.setCreateTime(now);
+            order.setOutId(String.valueOf(System.currentTimeMillis()));
+            order.setTradeFee(adjustFee);
+            order.setTradeAmount(adjustAmount);
+            order.setTradeServiceFee(BigDecimal.ZERO);
+            adjustOrders.add(this.adjust(order));
+        }
+
+        return adjustOrders;
     }
 }
