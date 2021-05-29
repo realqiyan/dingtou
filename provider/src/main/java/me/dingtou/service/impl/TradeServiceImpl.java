@@ -44,7 +44,7 @@ public class TradeServiceImpl implements TradeService {
 
     @Override
     public Order adjust(Order order) {
-        return tradeManager.adjust(order);
+        return tradeManager.adjust(order, true);
     }
 
     @Override
@@ -127,7 +127,7 @@ public class TradeServiceImpl implements TradeService {
             order.setTradeFee(adjustFee);
             order.setTradeAmount(adjustAmount);
             order.setTradeServiceFee(BigDecimal.ZERO);
-            adjustOrders.add(this.adjust(order));
+            adjustOrders.add(tradeManager.adjust(order, false));
         }
 
         return adjustOrders;

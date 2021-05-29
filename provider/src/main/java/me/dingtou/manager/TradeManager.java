@@ -164,7 +164,7 @@ public class TradeManager {
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public Order adjust(Order order) {
+    public Order adjust(Order order, boolean withStock) {
         StockOrder stockOrder = new StockOrder();
         Stock stock = order.getStock();
         stockOrder.setStockId(stock.getId());
@@ -178,9 +178,11 @@ public class TradeManager {
         stockOrder.setTradeStatus(order.getStatus().getCode());
         stockOrder.setType(order.getType().getCode());
         stockOrderDAO.insert(stockOrder);
-        stock.setAmount(stock.getAmount().add(order.getTradeAmount()));
-        stock.setTotalFee(stock.getTotalFee().add(order.getTradeFee()));
-        stockManager.update(stock);
+        if (withStock) {
+            stock.setAmount(stock.getAmount().add(order.getTradeAmount()));
+            stock.setTotalFee(stock.getTotalFee().add(order.getTradeFee()));
+            stockManager.update(stock);
+        }
         return queryByOutId(order.getStock(), order.getOutId());
     }
 
