@@ -1,6 +1,6 @@
 FROM openjdk:8
 
-RUN mkdir -p /dingtou
+RUN mkdir -p /dingtou/config
 
 #RUN wget -O /dingtou/application.yml https://github.com/dingtoume/dingtou/blob/master/start/src/main/resources/application.yml \
 #&& wget -O /dingtou/dingtou.jar https://github.com/dingtoume/dingtou/blob/master/dingtou.jar \
@@ -8,7 +8,7 @@ RUN mkdir -p /dingtou
 #&& chmod +x /dingtou/*.sh
 
 
-COPY ./start/src/main/resources/application.yml /dingtou
+COPY ./start/src/main/resources/application.yml /dingtou/config
 COPY ./dingtou.jar /dingtou
 COPY ./run.sh /dingtou
 
