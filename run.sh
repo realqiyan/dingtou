@@ -1,2 +1,10 @@
-#!/usr/bin/env bash
-nohup java -jar start/target/dingtou.jar --spring.config.location=../application.yml >> application.log  2>&1 &
+#!/bin/sh
+while true ; do
+  if ! pidof "java" > /dev/null ; then
+    echo "dingtou.jar try running"
+    java -jar dingtou.jar --spring.config.location=./application.yml > application.log
+    RET=$?
+    echo "RET CODE: ${RET}"
+  fi
+  sleep 30
+done
