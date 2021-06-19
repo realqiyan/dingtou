@@ -19,8 +19,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.math.BigDecimal.ROUND_DOWN;
-import static me.dingtou.strategy.trade.AverageValueTradeStrategy.AVERAGE_STRATEGY_KEY;
-import static me.dingtou.strategy.trade.AverageValueTradeStrategy.CURRENT_TARGET_VALUE_KEY;
+import static me.dingtou.strategy.trade.AverageValueTradeStrategy.*;
 
 @RestController
 public class ApiController {
@@ -59,6 +58,7 @@ public class ApiController {
                           @RequestParam(value = "increment", required = true) String increment,
                           @RequestParam(value = "serviceFeeRate", required = true) String serviceFeeRate,
                           @RequestParam(value = "minServiceFee", required = true) String minServiceFee,
+                          @RequestParam(value = "targetIndexCode", required = true) String targetIndexCode,
                           @RequestParam(value = "minTradeAmount", required = true) String minTradeAmount)
             throws Exception {
         String owner = SessionUtils.getCurrentOwner();
@@ -91,6 +91,9 @@ public class ApiController {
         // 低于120日均线 目标增量2.5倍
         averageStrategy.put(120, "2.5");
         attributes.put(AVERAGE_STRATEGY_KEY, JSON.toJSONString(averageStrategy));
+
+        //目标指数
+        attributes.put(TARGET_INDEX_CODE, targetIndexCode);
 
         tradeCfg.setAttributes(attributes);
         stock.setTradeCfg(tradeCfg);

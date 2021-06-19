@@ -23,6 +23,7 @@ function add(){
         increment: $('#increment').val(),
         serviceFeeRate: $('#serviceFeeRate').val(),
         minServiceFee: $('#minServiceFee').val(),
+        targetIndexCode: $('#targetIndexCode').val(),
         market: $('#market').val(),
         minTradeAmount: $('#minTradeAmount').val()
       },
