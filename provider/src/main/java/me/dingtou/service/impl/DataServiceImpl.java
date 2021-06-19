@@ -46,6 +46,8 @@ public class DataServiceImpl implements DataService {
                 dataStock.setId(orderStock.getId());
                 dataStock.setCode(orderStock.getCode());
                 e.setStock(dataStock);
+                e.setOutId(null);
+                e.setOrderId(null);
             });
             orders.addAll(stockOrder);
         }
@@ -78,6 +80,9 @@ public class DataServiceImpl implements DataService {
                 Long oldId = stock.getId();
                 Stock dbStock = stockManager.query(stock.getOwner(), stock.getType(), stock.getCode());
                 if (null != dbStock) {
+                    // 已经存在则更新称一致
+                    stock.setId(dbStock.getId());
+                    dbStock = stockManager.update(stock);
                     idMapping.put(oldId, dbStock);
                     continue;
                 }

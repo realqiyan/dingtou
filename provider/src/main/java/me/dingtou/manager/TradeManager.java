@@ -102,6 +102,7 @@ public class TradeManager {
         Stock stock = stockManager.query(owner, type, code);
         QueryWrapper<StockOrder> query = new QueryWrapper<StockOrder>();
         query.eq("stock_id", stock.getId());
+        query.orderByDesc("create_time");
         List<StockOrder> stockOrders = stockOrderDAO.selectList(query);
         return stockOrders.stream()
                 .map(e -> OrderConvert.convert(stock, e))

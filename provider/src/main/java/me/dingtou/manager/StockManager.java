@@ -61,6 +61,8 @@ public class StockManager {
         if (null != type) {
             query.eq("type", type.getCode());
         }
+        query.orderByDesc("last_trade_time");
+        query.orderByAsc("code");
         List<me.dingtou.dataobject.Stock> dbStockList = stockDAO.selectList(query);
         if (null == dbStockList || dbStockList.isEmpty()) {
             return null;
