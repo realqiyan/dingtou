@@ -29,24 +29,27 @@ import java.util.List;
 
 @Slf4j
 @RestController
-public class GithubLoginController {
+public class WeiboLoginController {
 
-    @Value("${me.dingtou.oauth.github.client_id}")
+    public static final String WEIBO_USER = "https://api.weibo.com/2/users/show.json?access_token=%s&uid=%s";
+    public static final String WEIBO_ACCESS_TOKEN = "https://api.weibo.com/oauth2/access_token";
+
+    @Value("${me.dingtou.oauth.weibo.client_id}")
     private String clientId;
-    @Value("${me.dingtou.oauth.github.client_secret}")
+    @Value("${me.dingtou.oauth.weibo.client_secret}")
     private String clientSecret;
-    @Value("${me.dingtou.oauth.github.redirect_uri}")
+    @Value("${me.dingtou.oauth.weibo.redirect_uri}")
     private String redirectUri;
 
     @Value("${me.dingtou.login.secretKey}")
     private String secretKey;
 
     /**
-     * httpclient
+     * 拉取证券数据专用httpclient
      */
     private static CloseableHttpClient httpclient = HttpClients.createDefault();
 
-    @RequestMapping(value = "/login/oauth_github", method = RequestMethod.GET)
+    @RequestMapping(value = "/login/oauth_weibo", method = RequestMethod.GET)
     public void login(@RequestParam(value = "code", required = true) String code, HttpServletResponse response) throws Exception {
         LoginUser loginUser = getUser(code);
         if (null != loginUser) {
@@ -61,7 +64,7 @@ public class GithubLoginController {
     }
 
     /**
-     * 获取github用户信息
+     * 获取weibo用户信息
      *
      * @param code
      * @return
@@ -70,17 +73,19 @@ public class GithubLoginController {
         if (null == code) {
             return null;
         }
-        String accessToken = getAccessToken(code);
+        JSONObject accessTokenObj = getAccessToken(code);
         CloseableHttpResponse response = null;
         try {
-            HttpGet httpGet = new HttpGet("https://api.github.com/user");
+            String accessToken = accessTokenObj.getString("access_token");
+            String uid = accessTokenObj.getString("uid");
+            String uri = String.format(WEIBO_USER, accessToken, uid);
+            HttpGet httpGet = new HttpGet(uri);
             httpGet.setHeader("Accept", "application/json");
-            httpGet.addHeader("Authorization", "token " + accessToken);
             response = httpclient.execute(httpGet);
             HttpEntity entity = response.getEntity();
             String content = EntityUtils.toString(entity);
             JSONObject jsonObject = JSON.parseObject(content);
-            return new LoginUser("github", jsonObject.getString("name"), jsonObject.getString("id"));
+            return new LoginUser("weibo", jsonObject.getString("name"), jsonObject.getString("id"));
         } catch (Exception e) {
             log.error("getAccessToken error.", e);
         } finally {
@@ -103,12 +108,13 @@ public class GithubLoginController {
      * @param code
      * @return
      */
-    private String getAccessToken(String code) {
+    private JSONObject getAccessToken(String code) {
         CloseableHttpResponse response = null;
         try {
-            HttpPost httpPost = new HttpPost("https://github.com/login/oauth/access_token");
+            HttpPost httpPost = new HttpPost(WEIBO_ACCESS_TOKEN);
             List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
             nameValuePairs.add(new BasicNameValuePair("code", code));
+            nameValuePairs.add(new BasicNameValuePair("grant_type", "authorization_code"));
             nameValuePairs.add(new BasicNameValuePair("client_id", clientId));
             nameValuePairs.add(new BasicNameValuePair("client_secret", clientSecret));
             nameValuePairs.add(new BasicNameValuePair("redirect_uri", redirectUri));
@@ -118,7 +124,7 @@ public class GithubLoginController {
             HttpEntity entity = response.getEntity();
             String content = EntityUtils.toString(entity);
             JSONObject jsonObject = JSON.parseObject(content);
-            return jsonObject.getString("access_token");
+            return jsonObject;
         } catch (Exception e) {
             log.error("getAccessToken error. code:" + code, e);
         } finally {

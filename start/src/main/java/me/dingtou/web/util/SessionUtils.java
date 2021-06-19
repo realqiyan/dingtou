@@ -63,7 +63,7 @@ public class SessionUtils {
         cookie.setSecure(true);
         cookie.setPath("/");
         cookie.setHttpOnly(true);
-        cookie.setMaxAge(3600);
+        cookie.setMaxAge(86400);
         return cookie;
     }
 

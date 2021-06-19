@@ -38,10 +38,15 @@ me:
   dingtou:
     login:
       needLogin: false
-      loginUrl: https://github.com/login/oauth/authorize?client_id=700a1ae2a42328279390
+      #loginUrl: https://github.com/login/oauth/authorize?client_id=700a1ae2a42328279390
+      loginUrl: https://api.weibo.com/oauth2/authorize?client_id=xxxxxxxxxxx&response_type=code&redirect_uri=https://dingtoume.cn/login/oauth_weibo
       secretKey: d7edf5704cae2e5105b2c99d6a4e32b655c36f8a3ae2dcc22ea4e7df1be8803e
     oauth:
       github:
         client_id: 700a1ae2a42328279390
         client_secret: bdca3d91e0867d5a1c4bbf01dc61a1f22a18eeff
         redirect_uri: https://dingtoume.cn/login/oauth_github
+      weibo:
+        client_id: xxxxxxxxxxx
+        client_secret: xxxxxxxxxxxxxxxxxxxx
+        redirect_uri: https://dingtoume.cn/login/oauth_weibo
