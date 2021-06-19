@@ -36,11 +36,11 @@ public class DataServiceImpl implements DataService {
 
         List<Order> orders = new ArrayList<>();
         for (Stock stock : stocks) {
-            stock.setOwner(null);
             List<Order> stockOrder = tradeManager.getStockOrder(stock.getOwner(), stock.getType(), stock.getCode());
             if (null == stockOrder || stockOrder.isEmpty()) {
                 continue;
             }
+            stock.setOwner(null);
             stockOrder.stream().forEach(e -> {
                 Stock orderStock = e.getStock();
                 Stock dataStock = new Stock();

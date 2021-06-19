@@ -23,6 +23,11 @@ public class LoginFilter implements Filter {
     private static final String LOGIN_PATH = "/login/.*";
 
     /**
+     * 图片白名单
+     */
+    private static final String IMAGE_PATH = "/images/.*";
+
+    /**
      * 是否需要登陆
      */
     private final boolean needLogin;
@@ -58,7 +63,7 @@ public class LoginFilter implements Filter {
             HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
             String pathInfo = httpServletRequest.getRequestURI();
             // 登陆白名单不拦截
-            if (pathInfo.matches(LOGIN_PATH)) {
+            if (pathInfo.matches(IMAGE_PATH) || pathInfo.matches(LOGIN_PATH)) {
                 filterChain.doFilter(servletRequest, servletResponse);
                 return;
             }
