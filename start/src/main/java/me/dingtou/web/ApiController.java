@@ -299,14 +299,7 @@ public class ApiController {
     public boolean importData(@RequestParam(value = "data", required = true) String data) throws Exception {
         String owner = SessionUtils.getCurrentOwner();
         StockPackage stockPackage = JSON.parseObject(data, StockPackage.class);
-        if (null != stockPackage.getStocks()) {
-            for (Stock stock : stockPackage.getStocks()) {
-                if (null == stock) {
-                    continue;
-                }
-                stock.setOwner(owner);
-            }
-        }
-        return dataService.importData(stockPackage);
+
+        return dataService.importData(owner, stockPackage);
     }
 }

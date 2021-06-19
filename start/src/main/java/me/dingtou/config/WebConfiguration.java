@@ -13,6 +13,8 @@ import java.util.List;
 @Configuration
 public class WebConfiguration implements WebMvcConfigurer {
 
+    public static final String DEFAULT = "default";
+    
     @Value("${me.dingtou.login.needLogin}")
     private boolean needLogin;
 
@@ -22,11 +24,17 @@ public class WebConfiguration implements WebMvcConfigurer {
     @Value("${me.dingtou.login.secretKey}")
     private String secretKey;
 
+
+    @Value("${me.dingtou.login.defaultOwner}")
+    private String defaultOwner;
+
     @Bean
     public FilterRegistrationBean filterRegistrationBean() {
 
         FilterRegistrationBean registrationBean = new FilterRegistrationBean();
-        LoginFilter filter = new LoginFilter(needLogin,secretKey, loginUrl);
+        String defaultOwner = this.defaultOwner;
+        defaultOwner = ((null == defaultOwner) ? DEFAULT : defaultOwner);
+        LoginFilter filter = new LoginFilter(needLogin, defaultOwner, secretKey, loginUrl);
         registrationBean.setFilter(filter);
         //设置过滤器拦截请求
         List<String> urls = new ArrayList<>();

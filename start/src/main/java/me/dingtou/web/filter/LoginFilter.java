@@ -15,7 +15,7 @@ import java.io.IOException;
 public class LoginFilter implements Filter {
 
     public static final String OWNER = "owner";
-    public static final String DEFAULT = "default";
+    public static final String DEFAULT_SOURCE = "default";
 
     /**
      * 登陆白名单
@@ -36,8 +36,14 @@ public class LoginFilter implements Filter {
      */
     private final String loginUrl;
 
-    public LoginFilter(boolean needLogin, String secretKey, String loginUrl) {
+    /**
+     * 默认用户
+     */
+    private final String defaultOwner;
+
+    public LoginFilter(boolean needLogin, String defaultOwner, String secretKey, String loginUrl) {
         this.needLogin = needLogin;
+        this.defaultOwner = defaultOwner;
         this.secretKey = secretKey;
         this.loginUrl = loginUrl;
     }
@@ -59,9 +65,9 @@ public class LoginFilter implements Filter {
             if (!needLogin) {
                 String owner = httpServletRequest.getParameter(OWNER);
                 if (null == owner) {
-                    owner = DEFAULT;
+                    owner = defaultOwner;
                 }
-                SessionUtils.setCurrentOwner(new LoginUser(DEFAULT, owner, owner));
+                SessionUtils.setCurrentOwner(new LoginUser(DEFAULT_SOURCE, owner, owner));
             } else {
                 LoginUser loginUser = getLoginUser(httpServletRequest.getCookies());
                 if (null == loginUser) {

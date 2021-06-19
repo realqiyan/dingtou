@@ -7,8 +7,10 @@ import me.dingtou.model.Stock;
 import me.dingtou.model.StockPackage;
 import me.dingtou.service.DataService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -52,42 +54,64 @@ public class DataServiceImpl implements DataService {
     }
 
     @Override
-    public boolean importData(StockPackage data) {
+    @Transactional(rollbackFor = Exception.class)
+    public boolean importData(String owner, StockPackage data) {
         if (null == data || (null == data.getStocks() && null == data.getOrders())) {
             return false;
         }
 
+        //更新owner
+        if (null != data.getStocks()) {
+            for (Stock stock : data.getStocks()) {
+                if (null == stock) {
+                    continue;
+                }
+                stock.setOwner(owner);
+            }
+        }
+
         List<Stock> stocks = data.getStocks();
-        Map<Long, Long> idMapping = new HashMap<>(stocks.size(), 1.0f);
+        // oldId -> newStock
+        Map<Long, Stock> idMapping = new HashMap<>(stocks.size(), 1.0f);
         if (null != stocks) {
             for (Stock stock : stocks) {
                 Long oldId = stock.getId();
                 Stock dbStock = stockManager.query(stock.getOwner(), stock.getType(), stock.getCode());
                 if (null != dbStock) {
-                    idMapping.put(oldId, dbStock.getId());
+                    idMapping.put(oldId, dbStock);
                     continue;
                 }
                 // 重置ID
                 stock.setId(null);
                 Stock newStock = stockManager.create(stock);
                 if (null != newStock) {
-                    idMapping.put(oldId, newStock.getId());
+                    idMapping.put(oldId, newStock);
                 }
             }
         }
 
         List<Order> orders = data.getOrders();
         if (null != orders) {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
             for (Order order : orders) {
                 if (null == order || null == order.getStock()) {
                     continue;
                 }
                 Long oldId = order.getStock().getId();
-                Long newId = idMapping.get(oldId);
-                if (null == newId) {
+                Stock newStock = idMapping.get(oldId);
+                if (null == newStock) {
                     continue;
                 }
-                order.getStock().setId(newId);
+                order.setStock(newStock);
+                Stock stock = order.getStock();
+                // 更新outId
+                String newOutId = String.format("%s_%s_%s_%s_%s",
+                        stock.getOwner(),
+                        order.getType().getCode(),
+                        stock.getMarket().getCode(),
+                        stock.getCode(),
+                        sdf.format(order.getTradeTime()));
+                order.setOutId(newOutId);
                 tradeManager.importOrder(order);
             }
         }

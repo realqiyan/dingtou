@@ -4,7 +4,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     # schema: classpath:db/schema-mysql.sql
     # data: classpath:db/data-mysql.sql
-    url: jdbc:mysql://127.0.0.1:3306/dingtou?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=CONVERT_TO_NULL&serverTimezone=Asia/Shanghai&useSSL=false
+    url: jdbc:mysql://127.0.0.1:3306/dingtou?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=CONVERT_TO_NULL&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
     username: dingtou
     password: DingTou.Me
 
@@ -36,11 +36,14 @@ spring:
 
 me:
   dingtou:
+    #登陆配置
     login:
       needLogin: false
+      defaultOwner: default
       #loginUrl: https://github.com/login/oauth/authorize?client_id=700a1ae2a42328279390
       loginUrl: https://api.weibo.com/oauth2/authorize?client_id=xxxxxxxxxxx&response_type=code&redirect_uri=https://dingtoume.cn/login/oauth_weibo
       secretKey: d7edf5704cae2e5105b2c99d6a4e32b655c36f8a3ae2dcc22ea4e7df1be8803e
+    #集成登陆配置
     oauth:
       github:
         client_id: 700a1ae2a42328279390

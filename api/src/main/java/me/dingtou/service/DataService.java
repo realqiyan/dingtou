@@ -18,9 +18,11 @@ public interface DataService {
     /**
      * 导入数据
      *
+     *
+     * @param owner
      * @param data
      * @return
      */
-    boolean importData(StockPackage data);
+    boolean importData(String owner, StockPackage data);
 
 }

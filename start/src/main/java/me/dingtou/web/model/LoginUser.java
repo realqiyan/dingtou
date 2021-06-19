@@ -50,7 +50,7 @@ public class LoginUser {
     }
 
     public String getOwnerCode() {
-        if (LoginFilter.DEFAULT.equals(source)) {
+        if (LoginFilter.DEFAULT_SOURCE.equals(source)) {
             return outerId;
         }
         return String.format("%s_%s", source, outerId);
