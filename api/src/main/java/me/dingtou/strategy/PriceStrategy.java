@@ -31,18 +31,6 @@ public interface PriceStrategy {
 
 
     /**
-     * 获取{day}日平均价格  SMA simple moving average
-     * 计算规则：(day1价格+day2价格+..+dayx价格)/x
-     *
-     * @param stock 股票基金
-     * @param date  当前日期
-     * @param x     交易日数量
-     * @return
-     */
-    BigDecimal smaPrice(Stock stock, Date date, int x);
-
-
-    /**
      * 价格列表
      *
      * @param stock 股票基金

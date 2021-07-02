@@ -10,7 +10,6 @@ import me.dingtou.constant.Market;
 import me.dingtou.model.Stock;
 import me.dingtou.model.StockPrice;
 import me.dingtou.util.StockInfoGetClients;
-import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
@@ -25,7 +24,6 @@ import java.util.stream.Collectors;
 /**
  * A股价格
  */
-@Component
 @Slf4j
 public class StockPriceStrategy extends BasePriceStrategy {
 

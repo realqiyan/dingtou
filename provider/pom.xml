@@ -61,6 +61,10 @@
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.futunn.openapi</groupId>
+            <artifactId>futu-api</artifactId>
+        </dependency>
     </dependencies>
 
 

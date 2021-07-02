@@ -5,10 +5,7 @@ import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import me.dingtou.constant.StockType;
 import me.dingtou.manager.PriceManager;
-import me.dingtou.model.Order;
-import me.dingtou.model.Stock;
-import me.dingtou.model.TradeCfg;
-import me.dingtou.model.TradeDetail;
+import me.dingtou.model.*;
 import me.dingtou.strategy.TradeStrategy;
 import me.dingtou.util.OrderUtils;
 import org.apache.commons.lang3.time.DateUtils;
@@ -49,6 +46,11 @@ public class AverageValueTradeStrategy implements TradeStrategy {
      * 上一期目标价值
      */
     public static final String PRE_TARGET_VALUE_KEY = "preTargetValue";
+
+    /**
+     * 本次交易价格
+     */
+    public static final String CURRENT_TRADE_PRICE = "currentTradePrice";
 
     /**
      * 目标指数编码
@@ -120,6 +122,7 @@ public class AverageValueTradeStrategy implements TradeStrategy {
         }
         // 当前价格
         BigDecimal currentPrice = priceManager.getCurrentPrice(stock);
+        attributes.put(CURRENT_TRADE_PRICE, currentPrice.toPlainString());
         // 当前份额
         BigDecimal amount = stock.getAmount();
         // 当前价值
@@ -232,15 +235,37 @@ public class AverageValueTradeStrategy implements TradeStrategy {
             }
         }
 
-
+        // 注意：股价不是前复权时统计会有问题
         Date now = new Date();
         // 计算均线平均价格
         int strategySize = averageStrategy.size();
+
         // 均线&价格
+        BigDecimal currentRehabPrice = null;
         final Map<Integer, BigDecimal> average = new HashMap<>(strategySize);
         for (Iterator<Integer> i = averageStrategy.keySet().iterator(); i.hasNext(); ) {
             Integer averageVal = i.next();
-            average.put(averageVal, priceManager.getSmaPrice(stock, now, averageVal));
+            if (averageVal <= 0) {
+                continue;
+            }
+            List<StockPrice> stockPrices = priceManager.getPrices(stock, now, averageVal);
+            if (null == stockPrices || stockPrices.isEmpty()) {
+                return increment;
+            }
+            if (null == currentRehabPrice) {
+                currentRehabPrice = stockPrices.get(stockPrices.size() - 1).getRehabPrice();
+            }
+            int num = 0;
+            BigDecimal totalPrice = BigDecimal.ZERO;
+            for (StockPrice stockPrice : stockPrices) {
+                // 没有复权至就直接返回
+                if (null == stockPrice.getRehabPrice()) {
+                    return increment;
+                }
+                num++;
+                totalPrice = totalPrice.add(stockPrice.getRehabPrice());
+            }
+            average.put(averageVal, totalPrice.divide(BigDecimal.valueOf(num), 4, RoundingMode.HALF_UP));
         }
 
         // 优先使用长期均线比较，优先使用长期均线价格
@@ -249,7 +274,9 @@ public class AverageValueTradeStrategy implements TradeStrategy {
         for (Integer averageVal : averageDays) {
             BigDecimal linePrice = average.get(averageVal);
             // 配置0日均线代表调整默认倍率（默认倍率1）
-            if (averageVal.intValue() != 0 && currentPrice.doubleValue() >= linePrice.doubleValue()) {
+            if (averageVal.intValue() != 0
+                    && null == currentRehabPrice
+                    && currentRehabPrice.doubleValue() >= linePrice.doubleValue()) {
                 continue;
             }
             // 均线&倍率
@@ -258,6 +285,7 @@ public class AverageValueTradeStrategy implements TradeStrategy {
             increment = increment.multiply(new BigDecimal(multiplyVal));
             break;
         }
+
         return increment;
     }
 

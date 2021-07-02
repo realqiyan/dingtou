@@ -93,6 +93,7 @@ public class FundPriceStrategy extends BasePriceStrategy {
                         throw new RuntimeException("参数异常");
                     }
                     price.setPrice(new BigDecimal(jsonData.getString("DWJZ")));
+                    price.setRehabPrice(new BigDecimal(jsonData.getString("LJJZ")));
                     finalPrices.add(price);
                 });
                 prices = finalPrices.stream()

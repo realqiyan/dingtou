@@ -23,6 +23,11 @@ public class StockPrice {
      */
     private BigDecimal price;
 
+    /**
+     * 复权价格
+     */
+    private BigDecimal rehabPrice;
+
     public Stock getStock() {
         return stock;
     }
@@ -45,5 +50,13 @@ public class StockPrice {
 
     public void setPrice(BigDecimal price) {
         this.price = price;
+    }
+
+    public BigDecimal getRehabPrice() {
+        return rehabPrice;
+    }
+
+    public void setRehabPrice(BigDecimal rehabPrice) {
+        this.rehabPrice = rehabPrice;
     }
 }

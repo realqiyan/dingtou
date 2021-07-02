@@ -7,7 +7,8 @@ RUN mkdir -p /dingtou/config
 #&& echo "nohup java -jar dingtou.jar --spring.config.location=./application.yml >> application.log  2>&1 &">/dingtou/run.sh \
 #&& chmod +x /dingtou/*.sh
 
-
+COPY ./docker/FutuOpenD /dingtou/FutuOpenD
+RUN chmod +x /dingtou/FutuOpenD/FutuOpenD
 COPY ./start/src/main/resources/application.yml /dingtou/config
 COPY ./dingtou.jar /dingtou
 COPY ./run.sh /dingtou

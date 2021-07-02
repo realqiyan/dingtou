@@ -59,27 +59,6 @@ public class PriceManager {
         throw new NullPointerException("PriceStrategy not found. ");
     }
 
-
-    /**
-     * 拉取均价
-     *
-     * @param stock
-     * @param date
-     * @param x
-     * @return
-     */
-    public BigDecimal getSmaPrice(Stock stock, Date date, int x) {
-        if (x <= 0) {
-            return null;
-        }
-        for (PriceStrategy priceStrategy : priceStrategies) {
-            if (priceStrategy.isMatch(stock)) {
-                return priceStrategy.smaPrice(stock, date, x);
-            }
-        }
-        throw new NullPointerException("PriceStrategy not found. ");
-    }
-
     /**
      * 拉取价格
      *
@@ -91,7 +70,15 @@ public class PriceManager {
     public List<StockPrice> getPrices(Stock stock, Date date, int x) {
         for (PriceStrategy priceStrategy : priceStrategies) {
             if (priceStrategy.isMatch(stock)) {
-                return priceStrategy.listPrice(stock, date, x);
+                List<StockPrice> stockPrices = priceStrategy.listPrice(stock, date, x);
+                // 结果按照时间排序
+                stockPrices.sort((o1, o2) -> {
+                    if (null == o1 || null == o2) {
+                        return 0;
+                    }
+                    return o1.getDate().compareTo(o2.getDate());
+                });
+                return stockPrices;
             }
         }
         throw new NullPointerException("PriceStrategy not found. ");
