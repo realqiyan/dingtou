@@ -5,7 +5,6 @@ import com.futu.openapi.pb.*;
 import com.google.protobuf.GeneratedMessageV3;
 import me.dingtou.constant.Market;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -23,14 +22,15 @@ public class FuTuAPI implements FTSPI_Qot, FTSPI_Conn {
 
     protected Map<Integer, Req> apiReqMap = new ConcurrentHashMap<>();
 
-    private static final String IP = "127.0.0.1";
+    private static final String DEFAULT_FU_TU_API_IP = "127.0.0.1";
     private static final short PORT = (short) 11111;
+    private static final String FU_TU_API_IP = System.getProperty("fuTuApiIp", DEFAULT_FU_TU_API_IP);
 
     static {
         FuTuAPI.QOT.setClientInfo("javaClient", 1);  //设置客户端信息
         FuTuAPI.QOT.setConnSpi(INSTANCE);  //设置连接回调
         FuTuAPI.QOT.setQotSpi(INSTANCE);   //设置交易回调
-        FuTuAPI.QOT.initConnect(IP, PORT, false);
+        FuTuAPI.QOT.initConnect(FU_TU_API_IP, PORT, false);
     }
 
     /**
@@ -75,7 +75,7 @@ public class FuTuAPI implements FTSPI_Qot, FTSPI_Conn {
             int seqNo = FuTuAPI.QOT.sub(req);
             if (seqNo == 0) {
                 // 重试建立连接
-                FuTuAPI.QOT.initConnect(IP, PORT, false);
+                FuTuAPI.QOT.initConnect(FU_TU_API_IP, PORT, false);
                 throw new RuntimeException("sub error");
             }
             FuTuAPI.Req apiReq = new Req(seqNo, ProtoID.QOT_SUB, syncEvent);
@@ -204,7 +204,7 @@ public class FuTuAPI implements FTSPI_Qot, FTSPI_Conn {
     @Override
     public void onDisconnect(FTAPI_Conn client, long errCode) {
         System.out.printf("Qot onDisconnect: ret=%b  connID=%d\n", errCode, client.getConnectID());
-        FuTuAPI.QOT.initConnect(IP, PORT, false);
+        FuTuAPI.QOT.initConnect(FU_TU_API_IP, PORT, false);
     }
 
     @Override

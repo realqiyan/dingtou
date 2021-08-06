@@ -268,15 +268,29 @@ public class AverageValueTradeStrategy implements TradeStrategy {
             average.put(averageVal, totalPrice.divide(BigDecimal.valueOf(num), 4, RoundingMode.HALF_UP));
         }
 
-        // 优先使用长期均线比较，优先使用长期均线价格
+        // 当前价格高于几条均线，就删除几条均线，优先删除长期（倍率高）均线，然后再来处理倍率。降低均线权重，避免价格低于120日线，高于30、60日线时倍率过大。
         List<Integer> averageDays = Lists.newArrayList(average.keySet().iterator());
         Collections.sort(averageDays, Comparator.reverseOrder());
+        // 检查比几条均线高
+        int overNum = 0;
+        for (Integer averageVal : averageDays) {
+            BigDecimal linePrice = average.get(averageVal);
+            if (null != currentRehabPrice && currentRehabPrice.doubleValue() > linePrice.doubleValue()) {
+                overNum++;
+            }
+        }
+        // 超过几条删几条
+        for (int i = 0; i < overNum; i++) {
+            averageDays.remove(0);
+        }
+        // 继续处理倍率，优先使用长期均线比较，优先使用长期均线价格
         for (Integer averageVal : averageDays) {
             BigDecimal linePrice = average.get(averageVal);
             // 配置0日均线代表调整默认倍率（默认倍率1）
-            if (averageVal.intValue() != 0
-                    && null == currentRehabPrice
-                    && currentRehabPrice.doubleValue() >= linePrice.doubleValue()) {
+            if (averageVal.intValue() != 0 &&
+                    null != currentRehabPrice &&
+                    currentRehabPrice.doubleValue() >= linePrice.doubleValue()
+            ) {
                 continue;
             }
             // 均线&倍率
