@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import me.dingtou.constant.StockType;
+import me.dingtou.constant.TradeType;
 import me.dingtou.manager.PriceManager;
 import me.dingtou.model.*;
 import me.dingtou.strategy.TradeStrategy;
@@ -312,10 +313,17 @@ public class AverageValueTradeStrategy implements TradeStrategy {
         BigDecimal tradeFee = order.getTradeFee();
         BigDecimal tradeServiceFee = order.getTradeServiceFee();
         if (StockType.FUND.equals(order.getStock().getType())) {
-            // 减去手续费后实际用于购买份额的金额
-            BigDecimal realTradeFee = tradeFee.subtract(tradeServiceFee);
-            BigDecimal tradeAmount = realTradeFee.divide(settlementPrice, 2, BigDecimal.ROUND_HALF_DOWN);
-            return new TradeDetail(null, tradeFee, tradeAmount, tradeServiceFee);
+            if (TradeType.BUY.equals(order.getType())) {
+                // 减去手续费后实际用于购买份额的金额
+                BigDecimal realTradeFee = tradeFee.subtract(tradeServiceFee);
+                BigDecimal tradeAmount = realTradeFee.divide(settlementPrice, 2, BigDecimal.ROUND_HALF_DOWN);
+                return new TradeDetail(null, tradeFee, tradeAmount, tradeServiceFee);
+            } else if (TradeType.SELL.equals(order.getType())) {
+                // 暂不计算手续费
+                BigDecimal tradeAmount = order.getTradeAmount();
+                BigDecimal realTradeFee = tradeAmount.multiply(settlementPrice);
+                return new TradeDetail(null, realTradeFee, tradeAmount, tradeServiceFee);
+            }
         }
         return new TradeDetail(null, tradeFee, order.getTradeAmount(), tradeServiceFee);
     }
