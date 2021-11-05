@@ -1,6 +1,7 @@
 package me.dingtou.web;
 
 import com.alibaba.fastjson.JSON;
+import lombok.extern.slf4j.Slf4j;
 import me.dingtou.constant.*;
 import me.dingtou.model.*;
 import me.dingtou.service.DataService;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 import static java.math.BigDecimal.ROUND_DOWN;
 import static me.dingtou.strategy.trade.AverageValueTradeStrategy.*;
 
+@Slf4j
 @RestController
 public class ApiController {
 
@@ -43,7 +45,6 @@ public class ApiController {
      * http://127.0.0.1:8080/stock/add?type=stock&code=515180&increment=500&serviceFeeRate=0.0001&minServiceFee=0.2&market=sh&minTradeAmount=100
      * </pre>
      *
-     * @param owner
      * @param type
      * @param code
      * @param serviceFeeRate
@@ -211,7 +212,7 @@ public class ApiController {
         try {
             tradeService.settlement(owner);
         } catch (Throwable t) {
-            //
+            log.error("settlement error,message:"+t.getMessage());
         }
         List<Stock> stockList = stockService.query(owner, null);
         if (null == stockList || stockList.isEmpty()) {

@@ -37,4 +37,15 @@ public class OrderUtils {
         return DateUtils.truncate(tradeTime, Calendar.DATE);
     }
 
+
+    /**
+     * 获取交易日
+     *
+     * @param tradeTime
+     * @return
+     */
+    public static Date getTradeDate(Date tradeTime) {
+        return DateUtils.truncate(tradeTime, Calendar.DATE);
+    }
+
 }

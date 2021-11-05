@@ -1,6 +1,7 @@
 package me.dingtou.manager;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import lombok.extern.slf4j.Slf4j;
 import me.dingtou.constant.StockType;
 import me.dingtou.constant.TradeStatus;
 import me.dingtou.constant.TradeType;
@@ -24,6 +25,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Component
 public class TradeManager {
 
@@ -147,7 +149,8 @@ public class TradeManager {
         stockOrder.setCode(stock.getCode());
         stockOrder.setOutId(order.getOutId());
         stockOrder.setCreateTime(order.getCreateTime());
-        stockOrder.setTradeTime(order.getTradeTime());
+        Date tradeTime = OrderUtils.getTradeDate(order.getCreateTime());
+        stockOrder.setTradeTime(tradeTime);
         stockOrder.setTradeAmount(order.getTradeAmount());
         stockOrder.setTradeFee(order.getTradeFee());
         stockOrder.setTradeServiceFee(order.getTradeServiceFee());
@@ -207,6 +210,7 @@ public class TradeManager {
                     TradeDetail calculate = tradeStrategy.calculateSettlement(OrderConvert.convert(stock, stockOrder));
                     if (null == calculate) {
                         // 价格没有更新时回滚整个交易结算
+                        log.error("TradeDetail is null，stockCode:" + stockOrder.getCode());
                         throw new RuntimeException("TradeDetail is null");
                     }
                     stockOrder.setTradeStatus(TradeStatus.DONE.getCode());
