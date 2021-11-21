@@ -1,6 +1,12 @@
 #!/bin/sh
 pid=`ps -aux | grep dingtou | grep java | awk '{print $2}'`
-kill -9 ${pid}
+echo $pid
+for id in $pid
+do
+kill -9 $id
+echo "kill $id"
+done
+echo "dingtou.jar try starting"
 while true ; do
   if ! pidof "java" > /dev/null ; then
     echo "dingtou.jar try running"
