@@ -1,4 +1,13 @@
 #!/bin/sh
+# run.sh
+pid=`ps -aux | grep run.sh | awk '{print $2}'`
+echo $pid
+for id in $pid
+do
+kill -9 $id
+echo "kill $id"
+done
+# java
 pid=`ps -aux | grep dingtou | grep java | awk '{print $2}'`
 echo $pid
 for id in $pid
