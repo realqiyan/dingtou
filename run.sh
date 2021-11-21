@@ -8,7 +8,7 @@ kill -9 $id
 echo "kill $id"
 done
 echo "dingtou.jar try starting"
-while true ; do
+#while true ; do
 if ! pidof "java" > /dev/null ; then
   echo "dingtou.jar try running"
   # fuTuApiIp指定富途服务api服务地址
@@ -16,5 +16,5 @@ if ! pidof "java" > /dev/null ; then
   RET=$?
   echo "dingtou.jar stopped. RET CODE: ${RET}"
 fi
-sleep 30
-done
+#sleep 30
+#done
