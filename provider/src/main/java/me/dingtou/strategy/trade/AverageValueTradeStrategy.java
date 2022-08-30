@@ -54,6 +54,11 @@ public class AverageValueTradeStrategy implements TradeStrategy {
     public static final String CURRENT_TRADE_PRICE = "currentTradePrice";
 
     /**
+     * 单次最大交易价格
+     */
+    public static final String PER_MAX_TRADE_PRICE = "perMaxTradePrice";
+
+    /**
      * 目标指数编码
      */
     public static final String TARGET_INDEX_CODE = "targetIndexCode";
@@ -163,6 +168,17 @@ public class AverageValueTradeStrategy implements TradeStrategy {
 
         // 交易金额
         BigDecimal tradeFee = targetValue.subtract(currentValue);
+
+
+        // 最大单次交易金额处理 PER_MAX_TRADE_PRICE
+        if (attributes.containsKey(PER_MAX_TRADE_PRICE)) {
+            BigDecimal perMaxTradePrice = new BigDecimal(attributes.get(PER_MAX_TRADE_PRICE));
+            if (tradeFee.compareTo(perMaxTradePrice) > 0) {
+                log.info("stock:{},perMaxTradePrice:{},tradeFee:{}", stock.getCode(), perMaxTradePrice, tradeFee);
+                tradeFee = perMaxTradePrice;
+            }
+        }
+
         // 交易份额
         BigDecimal tradeAmount = tradeFee.divide(currentPrice, 2, BigDecimal.ROUND_HALF_UP);
         // 最小交易份额（一手）
