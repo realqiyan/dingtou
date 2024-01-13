@@ -6,10 +6,10 @@ import me.dingtou.model.Order;
 import me.dingtou.model.Stock;
 import me.dingtou.model.StockPackage;
 import me.dingtou.service.DataService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,9 +19,9 @@ import java.util.Map;
 @Service
 public class DataServiceImpl implements DataService {
 
-    @Resource
+    @Autowired
     private StockManager stockManager;
-    @Resource
+    @Autowired
     private TradeManager tradeManager;
 
 

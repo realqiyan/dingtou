@@ -6,9 +6,9 @@ import me.dingtou.model.Stock;
 import me.dingtou.model.StockPrice;
 import me.dingtou.strategy.PriceStrategy;
 import me.dingtou.util.StockInfoGetClients;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
@@ -19,7 +19,7 @@ import java.util.List;
 @Component
 public class PriceManager {
 
-    @Resource
+    @Autowired
     private List<PriceStrategy> priceStrategies;
 
     /**

@@ -44,7 +44,7 @@ public class GithubLoginController {
     /**
      * httpclient
      */
-    private static CloseableHttpClient httpclient = HttpClients.createDefault();
+    private static final CloseableHttpClient httpclient = HttpClients.createDefault();
 
     @RequestMapping(value = "/login/oauth_github", method = RequestMethod.GET)
     public void login(@RequestParam(value = "code", required = true) String code, HttpServletResponse response) throws Exception {

@@ -9,9 +9,20 @@ function reloadData(){
       },
       success: function( result ) {
         tradeData = result;
+        var output = document.getElementById("output");
+        for(var i=0; i<tradeData.length; i++) {
+            var obj = tradeData[i];
+            output.innerHTML += "代码: " + obj.stock.code + "(" + obj.stock.name+ ")<br>";
+            output.innerHTML += "当前价格: " + obj.stock.tradeCfg.attributes.currentTradePrice + "<br>";
+            output.innerHTML += "当前估值: " + obj.stock.tradeCfg.attributes.currentTargetIndexValuation + "<br>";
+            output.innerHTML += "预估交易金额: " + obj.tradeFee + "<br>";
+            output.innerHTML += "预估服务费: " + obj.tradeServiceFee + "<br>";
+            output.innerHTML += "交易份额: " + obj.tradeAmount + "<br>";
+            output.innerHTML += "交易时间: " + obj.createTime + "<hr>";
+        }
         $("#json").JSONView(tradeData);
         $('#buy-btn').show();
-        $('#json').JSONView('toggle', 2);
+        $('#json').JSONView('toggle', 1);
       }
     });
 }
@@ -58,7 +69,7 @@ $(function() {
 //    });
 
     $('#toggle-level-btn').on('click', function() {
-        $('#json').JSONView('toggle', 2);
+        $('#json').JSONView('toggle', 1);
     });
 
     $('#reload-btn').on('click', function() {

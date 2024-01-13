@@ -10,9 +10,9 @@ import me.dingtou.model.*;
 import me.dingtou.strategy.TradeStrategy;
 import me.dingtou.util.OrderUtils;
 import org.apache.commons.lang3.time.DateUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
@@ -97,7 +97,7 @@ public class AverageValueTradeStrategy implements TradeStrategy {
         DEFAULT_AVERAGE_STRATEGY.put(120, "2.5");
     }
 
-    @Resource
+    @Autowired
     private PriceManager priceManager;
 
     @Override

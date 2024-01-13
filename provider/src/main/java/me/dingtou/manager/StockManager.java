@@ -6,17 +6,16 @@ import me.dingtou.constant.StockType;
 import me.dingtou.dao.StockDAO;
 import me.dingtou.model.Stock;
 import me.dingtou.util.StockConvert;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
 public class StockManager {
 
-    @Resource
+    @Autowired
     private StockDAO stockDAO;
 
     public Stock create(Stock stock) {

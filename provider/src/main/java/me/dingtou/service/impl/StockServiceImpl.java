@@ -7,9 +7,9 @@ import me.dingtou.manager.StockManager;
 import me.dingtou.model.Asset;
 import me.dingtou.model.Stock;
 import me.dingtou.service.StockService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -20,10 +20,10 @@ import static java.math.BigDecimal.ROUND_DOWN;
 @Slf4j
 public class StockServiceImpl implements StockService {
 
-    @Resource
+    @Autowired
     private StockManager stockManager;
 
-    @Resource
+    @Autowired
     private PriceManager priceManager;
 
     @Override

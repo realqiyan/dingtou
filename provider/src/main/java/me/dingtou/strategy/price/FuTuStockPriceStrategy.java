@@ -20,13 +20,15 @@ import java.util.stream.Collectors;
 /**
  * 股价
  */
-@Component
+//@Component
 @Slf4j
 public class FuTuStockPriceStrategy extends StockPriceStrategy {
 
     @Override
     public boolean isMatch(Stock stock) {
-        return Market.SH.equals(stock.getMarket()) || Market.SZ.equals(stock.getMarket()) || Market.HK.equals(stock.getMarket());
+        //return Market.SH.equals(stock.getMarket()) || Market.SZ.equals(stock.getMarket()) || Market.HK.equals(stock.getMarket());
+        // 暂停futu接口
+        return false;
     }
 
     @Override

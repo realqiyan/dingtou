@@ -14,10 +14,10 @@ import me.dingtou.strategy.TradeStrategy;
 import me.dingtou.util.OrderConvert;
 import me.dingtou.util.OrderUtils;
 import org.quartz.CronExpression;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -29,13 +29,13 @@ import java.util.stream.Collectors;
 @Component
 public class TradeManager {
 
-    @Resource
+    @Autowired
     private StockOrderDAO stockOrderDAO;
 
-    @Resource
+    @Autowired
     private StockManager stockManager;
 
-    @Resource
+    @Autowired
     private List<TradeStrategy> tradeStrategies;
 
     /**
