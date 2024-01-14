@@ -54,11 +54,19 @@ public class Order {
      * 交易状态
      */
     private TradeStatus status;
+    /**
+     * 当前盈亏金额
+     */
+    private BigDecimal currentProfitFee;
+    /**
+     * 当前盈亏比例
+     */
+    private BigDecimal currentProfitRatio;
 
     /**
      * 交易快照
      */
-    private Map<String,String> snapshot;
+    private Map<String, String> snapshot;
 
     public Long getOrderId() {
         return orderId;
@@ -145,6 +153,22 @@ public class Order {
 
     public void setStatus(TradeStatus status) {
         this.status = status;
+    }
+
+    public BigDecimal getCurrentProfitFee() {
+        return currentProfitFee;
+    }
+
+    public void setCurrentProfitFee(BigDecimal currentProfitFee) {
+        this.currentProfitFee = currentProfitFee;
+    }
+
+    public BigDecimal getCurrentProfitRatio() {
+        return currentProfitRatio;
+    }
+
+    public void setCurrentProfitRatio(BigDecimal currentProfitRatio) {
+        this.currentProfitRatio = currentProfitRatio;
     }
 
     public Map<String, String> getSnapshot() {

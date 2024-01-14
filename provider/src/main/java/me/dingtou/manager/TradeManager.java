@@ -3,6 +3,7 @@ package me.dingtou.manager;
 import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
+import me.dingtou.constant.OrderSnapshotKeys;
 import me.dingtou.constant.StockType;
 import me.dingtou.constant.TradeStatus;
 import me.dingtou.constant.TradeType;
@@ -10,12 +11,10 @@ import me.dingtou.dao.StockOrderDAO;
 import me.dingtou.dataobject.StockOrder;
 import me.dingtou.model.Order;
 import me.dingtou.model.Stock;
-import me.dingtou.model.TradeCfg;
 import me.dingtou.model.TradeDetail;
 import me.dingtou.strategy.TradeStrategy;
 import me.dingtou.util.OrderConvert;
 import me.dingtou.util.OrderUtils;
-import org.quartz.CronExpression;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,9 +53,12 @@ public class TradeManager {
         BigDecimal tradeFee = null;
         BigDecimal tradeAmount = null;
         BigDecimal tradeServiceFee = null;
+        // 所有订单拿出来实时统计
+        List<Order> stockOrders = getStockOrder(stock.getOwner(), stock.getType(), stock.getCode());
+        TradeDetail calculate = null;
         for (TradeStrategy tradeStrategy : tradeStrategies) {
             if (tradeStrategy.isMatch(stock)) {
-                TradeDetail calculate = tradeStrategy.calculateConform(stock, now);
+                calculate = tradeStrategy.calculateConform(stock, stockOrders, now);
                 tradeFee = calculate.getTradeFee();
                 tradeAmount = calculate.getTradeAmount();
                 tradeServiceFee = calculate.getTradeServiceFee();
@@ -87,11 +89,15 @@ public class TradeManager {
             order.setOutId(buildOutId(TradeType.SELL, now, stock));
         }
 
-        order.setTradeTime(OrderUtils.getNextTradeTime(stock, now));
+        order.setTradeTime(OrderUtils.getTradeDate(now));
 
         // 交易快照
         Map<String, String> snapshot = new HashMap<>();
-        snapshot.put(TradeCfg.class.getSimpleName(), JSON.toJSONString(stock.getTradeCfg()));
+        snapshot.put(OrderSnapshotKeys.TRADE_CFG, JSON.toJSONString(stock.getTradeCfg()));
+        if (null != calculate && null != calculate.getSellOrders()) {
+            List<String> outIds = calculate.getSellOrders().stream().map(Order::getOutId).collect(Collectors.toList());
+            snapshot.put(OrderSnapshotKeys.BUY_ORDER_OUT_IDS, JSON.toJSONString(outIds));
+        }
         order.setSnapshot(snapshot);
 
         return order;
@@ -257,20 +263,9 @@ public class TradeManager {
     }
 
     private String buildOutId(TradeType type, Date now, Stock stock) {
-
-        Date tradeDate = null;
-        CronExpression cron = null;
-        try {
-            cron = new CronExpression(stock.getTradeCfg().getTradeCron());
-            tradeDate = cron.getNextValidTimeAfter(now);
-        } catch (Exception e) {
-            tradeDate = new Date();
-        }
-
-
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
         //buy_default_fund_000001_20210217
-        return String.format("%s_%s_%s_%s_%s", stock.getOwner(), type.getCode(), stock.getMarket().getCode(), stock.getCode(), sdf.format(tradeDate));
+        return String.format("%s_%s_%s_%s_%s", stock.getOwner(), type.getCode(), stock.getMarket().getCode(), stock.getCode(), sdf.format(now));
     }
 
 }

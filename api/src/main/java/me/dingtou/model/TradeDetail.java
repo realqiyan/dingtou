@@ -1,6 +1,7 @@
 package me.dingtou.model;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * 交易详情（包含：买入金额和份数）
@@ -23,6 +24,11 @@ public class TradeDetail {
      */
     private BigDecimal tradeServiceFee;
 
+    /**
+     * 卖出的订单
+     */
+    private List<Order> sellOrders;
+
     public TradeDetail() {
     }
 
@@ -31,6 +37,12 @@ public class TradeDetail {
         this.tradeFee = tradeFee;
         this.tradeAmount = tradeAmount;
         this.tradeServiceFee = tradeServiceFee;
+
+    }
+
+    public TradeDetail(BigDecimal targetValue, BigDecimal tradeFee, BigDecimal tradeAmount, BigDecimal tradeServiceFee, List<Order> sellOrders) {
+        this(targetValue, tradeFee, tradeAmount, tradeServiceFee);
+        this.sellOrders = sellOrders;
     }
 
     public BigDecimal getTargetValue() {
@@ -63,5 +75,9 @@ public class TradeDetail {
 
     public void setTradeServiceFee(BigDecimal tradeServiceFee) {
         this.tradeServiceFee = tradeServiceFee;
+    }
+
+    public List<Order> getSellOrders() {
+        return sellOrders;
     }
 }

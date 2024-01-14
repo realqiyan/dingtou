@@ -16,27 +16,26 @@ public interface PriceStrategy {
     /**
      * 策略是否生效
      *
-     * @param stock
-     * @return
+     * @param stock 股票对象
+     * @return 是否生效
      */
     boolean isMatch(Stock stock);
 
     /**
      * 获取当前金额
      *
-     * @param stock
-     * @return
+     * @param stock 股票对象
+     * @return 当前金额
      */
     BigDecimal currentPrice(Stock stock);
-
 
     /**
      * 价格列表
      *
-     * @param stock 股票基金
+     * @param stock 股票对象
      * @param date  当前日期
      * @param x     交易日数量
-     * @return
+     * @return 价格列表
      */
     List<StockPrice> listPrice(Stock stock, Date date, int x);
 
@@ -45,7 +44,7 @@ public interface PriceStrategy {
      *
      * @param stock 标的
      * @param date  交易时间
-     * @return
+     * @return 结算金额
      */
     BigDecimal getSettlementPrice(Stock stock, Date date);
 }

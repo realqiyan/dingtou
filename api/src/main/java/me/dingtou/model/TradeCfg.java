@@ -17,11 +17,6 @@ public class TradeCfg {
     private String tradeStrategy;
 
     /**
-     * 交易周期 cron表达式 例如：0 0 15 ? * 6
-     */
-    private String tradeCron;
-
-    /**
      * 定投增量 500.00元
      */
     private BigDecimal increment;
@@ -61,14 +56,6 @@ public class TradeCfg {
 
     public void setTradeStrategy(String tradeStrategy) {
         this.tradeStrategy = tradeStrategy;
-    }
-
-    public String getTradeCron() {
-        return tradeCron;
-    }
-
-    public void setTradeCron(String tradeCron) {
-        this.tradeCron = tradeCron;
     }
 
     public BigDecimal getIncrement() {

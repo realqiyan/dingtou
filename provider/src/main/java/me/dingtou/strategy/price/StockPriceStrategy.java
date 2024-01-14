@@ -8,11 +8,15 @@ import com.google.common.cache.CacheBuilder;
 import lombok.extern.slf4j.Slf4j;
 import me.dingtou.constant.Market;
 import me.dingtou.model.Stock;
+import me.dingtou.model.StockAdjust;
 import me.dingtou.model.StockPrice;
-import me.dingtou.util.StockInfoGetClients;
+import me.dingtou.util.HttpUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.temporal.ChronoUnit;
@@ -20,6 +24,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -29,8 +35,9 @@ import java.util.stream.Collectors;
 @Component
 public class StockPriceStrategy extends BasePriceStrategy {
 
+    private static final String QFQ_DATA_PATTERN = "(\\{.*\\})";
     // 30秒缓存
-    private Cache<String, String> cache = CacheBuilder.newBuilder()
+    private final Cache<String, String> cache = CacheBuilder.newBuilder()
             .maximumSize(500)
             .expireAfterWrite(30, TimeUnit.SECONDS)
             .build();
@@ -63,20 +70,23 @@ public class StockPriceStrategy extends BasePriceStrategy {
         return null;
     }
 
+
+    /**
+     * 获取指定股票在指定时间范围内的时间
+     *
+     * @param stock    股票对象
+     * @param date     开始日期
+     * @param timeSpan 时间跨度
+     * @return 指定股票在指定时间范围内的价格列表
+     */
     @Override
-    public List<StockPrice> pullPrices(Stock stock, Date date, int x) {
-        // 计算date和当前时间的时间差 x+上时间差
+    public List<StockPrice> pullPrices(Stock stock, Date date, int timeSpan) {
+        // 计算date和当前时间的时间差 timeSpan+上时间差
         Date now = new Date();
         long between = Math.abs(ChronoUnit.DAYS.between(now.toInstant(), date.toInstant()));
-        x += between;
-        //日K:https://quotes.sina.cn/cn/api/json_v2.php/CN_MarketDataService.getKLineData?symbol=sz000002&scale=240&ma=no&datalen=30
-        List<StockPrice> stockPrices = null;
-        if (Market.SH.equals(stock.getMarket())) {
-            stockPrices = pullStockPrice(stock, String.format("https://quotes.sina.cn/cn/api/json_v2.php/CN_MarketDataService.getKLineData?symbol=sh%s&scale=240&ma=no&datalen=%s", stock.getCode(), x));
-        } else if (Market.SZ.equals(stock.getMarket())) {
-            stockPrices = pullStockPrice(stock, String.format("https://quotes.sina.cn/cn/api/json_v2.php/CN_MarketDataService.getKLineData?symbol=sz%s&scale=240&ma=no&datalen=%s", stock.getCode(), x));
-        }
-        if (null != stockPrices) {
+        timeSpan += (int) between;
+        List<StockPrice> stockPrices = pullStockPrice(stock, timeSpan);
+        if (null != stockPrices && !stockPrices.isEmpty()) {
             stockPrices = stockPrices.stream()
                     .filter(e -> ChronoUnit.DAYS.between(e.getDate().toInstant(), date.toInstant()) >= 0)
                     .collect(Collectors.toList());
@@ -88,7 +98,7 @@ public class StockPriceStrategy extends BasePriceStrategy {
     private BigDecimal getStockPrice(String url) {
         String urlContent = null;
         try {
-            urlContent = cache.get(url, () -> StockInfoGetClients.getUrlContent(url));
+            urlContent = cache.get(url, () -> HttpUtils.getUrlContent(url));
             String[] strings = urlContent.split("~");
             return new BigDecimal(strings[3]);
         } catch (Exception e) {
@@ -98,14 +108,43 @@ public class StockPriceStrategy extends BasePriceStrategy {
 
     }
 
-    private List<StockPrice> pullStockPrice(Stock stock, String url) {
+    private List<StockPrice> pullStockPrice(Stock stock, int timeSpan) {
         try {
+            //日K:https://quotes.sina.cn/cn/api/json_v2.php/CN_MarketDataService.getKLineData?symbol=sz000002&scale=240&ma=no&datalen=30
+            String symbol = (stock.getMarket().equals(Market.SH) ? "sh" : "sz") + stock.getCode();
+            String historyApiUrl = String.format("https://quotes.sina.cn/cn/api/json_v2.php/CN_MarketDataService.getKLineData?symbol=%s&scale=240&ma=no&datalen=%s", symbol, timeSpan);
+
+            //前复权:https://finance.sina.com.cn/realstock/company/sz000002/qfq.js
+            String adjustApiUrl = String.format("https://finance.sina.com.cn/realstock/company/%s/qfq.js", symbol);
+
             List<StockPrice> prices = new ArrayList<StockPrice>();
-            String content = StockInfoGetClients.getUrlContent(url);
-            JSONArray priceList = JSON.parseArray(content);
+            String historyContent = HttpUtils.getUrlContent(historyApiUrl);
+            JSONArray priceList = JSON.parseArray(historyContent);
             if (null != priceList) {
+
+                List<StockAdjust> adjustList = new ArrayList<StockAdjust>();
+                // 前复权数据
+                String adjustContent = HttpUtils.getUrlContent(adjustApiUrl);
+                if (!StringUtils.isBlank(adjustContent)) {
+                    Pattern qfq = Pattern.compile(QFQ_DATA_PATTERN);
+                    Matcher m = qfq.matcher(adjustContent);
+                    if (m.find()) {
+                        JSONObject adjustJson = JSON.parseObject(m.group(0));
+                        JSONArray qfqValues = adjustJson.getJSONArray("data");
+                        if (null != qfqValues) {
+                            qfqValues.forEach(qfqValue -> {
+                                JSONObject qfqJson = (JSONObject) qfqValue;
+                                Date adjustDate = qfqJson.getDate("d");
+                                BigDecimal adjustVal = new BigDecimal(qfqJson.getString("f"));
+                                StockAdjust adjust = new StockAdjust(stock.getCode(), adjustDate, adjustVal);
+                                adjustList.add(adjust);
+                            });
+                            adjustList.sort(StockAdjust::compareTo);
+                        }
+                    }
+                }
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-                priceList.stream().forEach(data -> {
+                priceList.forEach(data -> {
                     JSONObject jsonData = (JSONObject) data;
                     StockPrice price = new StockPrice();
                     price.setStock(stock);
@@ -115,6 +154,7 @@ public class StockPriceStrategy extends BasePriceStrategy {
                         throw new RuntimeException("参数异常");
                     }
                     price.setPrice(new BigDecimal(jsonData.getString("close")));
+                    price.setRehabPrice(adjust(price, adjustList));
                     prices.add(price);
                 });
                 return prices;
@@ -125,4 +165,29 @@ public class StockPriceStrategy extends BasePriceStrategy {
         return null;
     }
 
+    /**
+     * 根据调整列表对股票价格进行调整
+     *
+     * @param price       股票价格对象
+     * @param adjustList  调整列表
+     * @return  返回调整后的价格，如果不符合任何调整则返回null
+     */
+    private BigDecimal adjust(StockPrice price, List<StockAdjust> adjustList) {
+        for (StockAdjust adjust : adjustList) {
+            if (price.getDate().after(adjust.getAdjustDate()) || DateUtils.isSameDay(price.getDate(), adjust.getAdjustDate())) {
+                return price.getPrice().divide(adjust.getAdjustVal(), 2, RoundingMode.FLOOR);
+            }
+        }
+        return null;
+    }
+
+
+    public static void main(String[] args) {
+        Stock stock = new Stock();
+        stock.setCode("000002");
+        stock.setMarket(Market.SZ);
+        List<StockPrice> stockPrices = new StockPriceStrategy().pullStockPrice(stock, 100);
+        assert stockPrices != null;
+        stockPrices.forEach(e -> System.out.println(new SimpleDateFormat("yyyy-MM-dd").format(e.getDate()) + " " + e.getRehabPrice()));
+    }
 }

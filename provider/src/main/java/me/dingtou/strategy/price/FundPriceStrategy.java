@@ -9,7 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import me.dingtou.constant.Market;
 import me.dingtou.model.Stock;
 import me.dingtou.model.StockPrice;
-import me.dingtou.util.StockInfoGetClients;
+import me.dingtou.util.HttpUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.stereotype.Component;
@@ -75,15 +75,16 @@ public class FundPriceStrategy extends BasePriceStrategy {
         try {
             Date now = new Date();
             long between = Math.abs(ChronoUnit.DAYS.between(now.toInstant(), date.toInstant()));
-            x += between;
+            x += (int) between;
             List<StockPrice> prices = new ArrayList<StockPrice>();
-            String content = StockInfoGetClients.getUrlContent(String.format("https://fundmobapi.eastmoney.com/FundMApi/FundNetDiagram.ashx?deviceid=h5&version=1.2&product=EFund&plat=Wap&FCODE=%s&pageIndex=1&pageSize=%s&_=%s", stock.getCode(), x, System.currentTimeMillis()));
+            String content = HttpUtils.getUrlContent(String.format("https://fundmobapi.eastmoney.com/FundMApi/FundNetDiagram.ashx?deviceid=h5&version=1.2&product=EFund&plat=Wap&FCODE=%s&pageIndex=1&pageSize=%s&_=%s", stock.getCode(), x, System.currentTimeMillis()));
             JSONObject fundData = JSON.parseObject(content);
-            JSONArray datas = fundData.getJSONArray("Datas");
-            if (null != datas) {
+            assert fundData != null;
+            JSONArray priceArr = fundData.getJSONArray("Datas");
+            if (null != priceArr) {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                 List<StockPrice> finalPrices = prices;
-                datas.stream().forEach(data -> {
+                priceArr.forEach(data -> {
                     JSONObject jsonData = (JSONObject) data;
                     StockPrice price = new StockPrice();
                     price.setStock(stock);
@@ -114,8 +115,9 @@ public class FundPriceStrategy extends BasePriceStrategy {
     private BigDecimal getCurrentFundPrice(Stock stock) {
         try {
             String url = String.format("https://fundmobapi.eastmoney.com/FundMApi/FundBasicInformation.ashx?FCODE=%s&deviceid=h5&plat=Wap&product=EFund&version=1.2", stock.getCode());
-            String content = StockInfoGetClients.getUrlContent(url);
+            String content = HttpUtils.getUrlContent(url);
             JSONObject fundData = JSON.parseObject(content);
+            assert fundData != null;
             JSONObject data = fundData.getJSONObject("Datas");
             String price = data.getString("DWJZ");
             Date fsrq = data.getDate("FSRQ");
@@ -125,8 +127,9 @@ public class FundPriceStrategy extends BasePriceStrategy {
                 fsrq = new Date();
             }
             url = String.format("https://fundmobapi.eastmoney.com/FundMApi/FundVarietieValuationDetail.ashx?FCODE=%s&deviceid=h5&plat=Wap&product=EFund&version=1.2", stock.getCode());
-            content = StockInfoGetClients.getUrlContent(url);
+            content = HttpUtils.getUrlContent(url);
             fundData = JSON.parseObject(content);
+            assert fundData != null;
             JSONObject expansion = fundData.getJSONObject("Expansion");
             String gz = expansion.getString("GZ");
             if (StringUtils.isBlank(gz)) {
@@ -134,7 +137,7 @@ public class FundPriceStrategy extends BasePriceStrategy {
             }
             Date gztime = DateUtils.parseDate(expansion.getString("GZTIME"), "yyyy-MM-dd HH:mm");
 
-            if (null != fsrq && DateUtils.isSameDay(fsrq, gztime)) {
+            if (DateUtils.isSameDay(fsrq, gztime)) {
                 return new BigDecimal(price);
             }
 

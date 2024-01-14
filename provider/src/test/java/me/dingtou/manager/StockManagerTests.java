@@ -6,7 +6,7 @@ import me.dingtou.strategy.trade.AverageValueTradeStrategy;
 
 import java.math.BigDecimal;
 
-class StockManagerTest {
+class StockManagerTests {
 
     @org.junit.jupiter.api.BeforeEach
     void setUp() {
@@ -34,7 +34,6 @@ class StockManagerTest {
 
     public static void main(String[] args) {
         TradeCfg tradeCfg = new TradeCfg();
-        tradeCfg.setTradeCron("0 0 15 ? * 6");
         tradeCfg.setIncrement(BigDecimal.valueOf(500));
         tradeCfg.setMinServiceFee(BigDecimal.ZERO);
         tradeCfg.setServiceFeeRate(new BigDecimal("0.0015"));

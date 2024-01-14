@@ -73,7 +73,6 @@ public class ApiController {
 
         TradeCfg tradeCfg = new TradeCfg();
         tradeCfg.setTradeStrategy(AverageValueTradeStrategy.CODE);
-        tradeCfg.setTradeCron("0 0 15 ? * 6");
         tradeCfg.setIncrement(new BigDecimal(increment));
         tradeCfg.setServiceFeeRate(new BigDecimal(serviceFeeRate));
         tradeCfg.setMinServiceFee(new BigDecimal(minServiceFee));
@@ -82,16 +81,7 @@ public class ApiController {
         Map<String, String> attributes = new HashMap<>();
         attributes.put(CURRENT_TARGET_VALUE_KEY, "0");
 
-        Map<Integer, String> averageStrategy = new HashMap<>(4, 1.0f);
-        // 默认1倍
-        averageStrategy.put(0, "1");
-        // 低于30日均线 目标增量1.5倍
-        averageStrategy.put(30, "1.5");
-        // 低于60日均线 目标增量2倍
-        averageStrategy.put(60, "2.0");
-        // 低于120日均线 目标增量2.5倍
-        averageStrategy.put(120, "2.5");
-        attributes.put(AVERAGE_STRATEGY_KEY, JSON.toJSONString(averageStrategy));
+        attributes.put(SMA_STRATEGY_KEY, "4|10,30,60,120|1.5,1.25,1,0");
 
         //目标指数
         attributes.put(TARGET_INDEX_CODE, targetIndexCode);
@@ -102,8 +92,7 @@ public class ApiController {
         stock.setTotalFee(BigDecimal.ZERO);
         stock.setAmount(BigDecimal.ZERO);
 
-        Stock dbStock = stockService.create(stock);
-        return dbStock;
+        return stockService.create(stock);
     }
 
     @RequestMapping(value = "/stock/query", method = RequestMethod.GET)

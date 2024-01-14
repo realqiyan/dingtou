@@ -13,21 +13,21 @@ import java.io.IOException;
  * HttpClients
  */
 @Slf4j
-public class StockInfoGetClients {
+public class HttpUtils {
 
     /**
      * 拉取证券数据专用httpclient
      */
-    private static CloseableHttpClient httpclient = HttpClients.custom()
+    private static final CloseableHttpClient httpclient = HttpClients.custom()
             .setMaxConnPerRoute(20)
             .setMaxConnTotal(20)
             .build();
 
     /**
-     * get
+     * 通过URL获取内容
      *
-     * @param url
-     * @return
+     * @param url URL地址
+     * @return 返回URL内容，如果获取失败返回null
      */
     public static String getUrlContent(String url) {
         CloseableHttpResponse response = null;
@@ -43,10 +43,11 @@ public class StockInfoGetClients {
                 try {
                     response.close();
                 } catch (IOException e) {
-                    //
+                    // 忽略IO异常
                 }
             }
         }
     }
+
 
 }
