@@ -1,10 +1,13 @@
 package me.dingtou.util;
 
+import com.alibaba.fastjson2.JSON;
 import me.dingtou.constant.TradeStatus;
 import me.dingtou.constant.TradeType;
 import me.dingtou.dataobject.StockOrder;
 import me.dingtou.model.Order;
 import me.dingtou.model.Stock;
+
+import java.util.Map;
 
 public class OrderConvert {
     public static Order convert(Stock stock, StockOrder dbOrder) {
@@ -22,6 +25,7 @@ public class OrderConvert {
         order.setTradeTime(dbOrder.getTradeTime());
         order.setOutId(dbOrder.getOutId());
         order.setOrderId(dbOrder.getId());
+        order.setSnapshot(JSON.<Map<String, String>>parseObject(dbOrder.getSnapshot(), Map.class));
         return order;
     }
 }

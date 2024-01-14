@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 public class FundPriceStrategy extends BasePriceStrategy {
 
     // 30秒缓存
-    private Cache<String, BigDecimal> cache = CacheBuilder.newBuilder()
+    private final Cache<String, BigDecimal> cache = CacheBuilder.newBuilder()
             .maximumSize(500)
             .expireAfterWrite(30, TimeUnit.SECONDS)
             .build();

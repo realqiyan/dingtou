@@ -5,6 +5,7 @@ import me.dingtou.constant.TradeType;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.Map;
 
 /**
  * 交易订单
@@ -53,6 +54,11 @@ public class Order {
      * 交易状态
      */
     private TradeStatus status;
+
+    /**
+     * 交易快照
+     */
+    private Map<String,String> snapshot;
 
     public Long getOrderId() {
         return orderId;
@@ -139,5 +145,13 @@ public class Order {
 
     public void setStatus(TradeStatus status) {
         this.status = status;
+    }
+
+    public Map<String, String> getSnapshot() {
+        return snapshot;
+    }
+
+    public void setSnapshot(Map<String, String> snapshot) {
+        this.snapshot = snapshot;
     }
 }

@@ -1,5 +1,6 @@
 package me.dingtou.manager;
 
+import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import me.dingtou.constant.StockType;
@@ -9,6 +10,7 @@ import me.dingtou.dao.StockOrderDAO;
 import me.dingtou.dataobject.StockOrder;
 import me.dingtou.model.Order;
 import me.dingtou.model.Stock;
+import me.dingtou.model.TradeCfg;
 import me.dingtou.model.TradeDetail;
 import me.dingtou.strategy.TradeStrategy;
 import me.dingtou.util.OrderConvert;
@@ -20,9 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -89,6 +89,11 @@ public class TradeManager {
 
         order.setTradeTime(OrderUtils.getNextTradeTime(stock, now));
 
+        // 交易快照
+        Map<String, String> snapshot = new HashMap<>();
+        snapshot.put(TradeCfg.class.getSimpleName(), JSON.toJSONString(stock.getTradeCfg()));
+        order.setSnapshot(snapshot);
+
         return order;
     }
 
@@ -106,9 +111,7 @@ public class TradeManager {
         query.eq("stock_id", stock.getId());
         query.orderByDesc("create_time");
         List<StockOrder> stockOrders = stockOrderDAO.selectList(query);
-        return stockOrders.stream()
-                .map(e -> OrderConvert.convert(stock, e))
-                .collect(Collectors.toList());
+        return stockOrders.stream().map(e -> OrderConvert.convert(stock, e)).collect(Collectors.toList());
     }
 
     public void importOrder(Order order) {
@@ -156,6 +159,7 @@ public class TradeManager {
         stockOrder.setTradeServiceFee(order.getTradeServiceFee());
         stockOrder.setTradeStatus(order.getStatus().getCode());
         stockOrder.setType(order.getType().getCode());
+        stockOrder.setSnapshot(JSON.toJSONString(order.getSnapshot()));
         stockOrderDAO.insert(stockOrder);
         stockManager.update(stock);
         return queryByOutId(order.getStock(), order.getOutId());
@@ -266,12 +270,7 @@ public class TradeManager {
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
         //buy_default_fund_000001_20210217
-        return String.format("%s_%s_%s_%s_%s",
-                stock.getOwner(),
-                type.getCode(),
-                stock.getMarket().getCode(),
-                stock.getCode(),
-                sdf.format(tradeDate));
+        return String.format("%s_%s_%s_%s_%s", stock.getOwner(), type.getCode(), stock.getMarket().getCode(), stock.getCode(), sdf.format(tradeDate));
     }
 
 }

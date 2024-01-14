@@ -10,6 +10,7 @@ function reloadData(){
       success: function( result ) {
         tradeData = result;
         var output = document.getElementById("output");
+        output.innerHTML = "";
         for(var i=0; i<tradeData.length; i++) {
             var obj = tradeData[i];
             output.innerHTML += "代码: " + obj.stock.code + "(" + obj.stock.name+ ")<br>";
