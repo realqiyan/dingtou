@@ -16,12 +16,20 @@ function reloadData(){
             output.innerHTML += "代码: " + obj.stock.code + "(" + obj.stock.name+ ")<br>";
             output.innerHTML += "当前价格: " + obj.stock.tradeCfg.attributes.currentTradePrice + "<br>";
             output.innerHTML += "当前估值: " + obj.stock.tradeCfg.attributes.currentTargetIndexValuation + "<br>";
+            output.innerHTML += "当前目标: " + obj.stock.tradeCfg.attributes.currentTargetValue + "<br>";
             output.innerHTML += "预估交易金额: " + obj.tradeFee + "<br>";
             output.innerHTML += "预估服务费: " + obj.tradeServiceFee + "<br>";
             output.innerHTML += "交易份额: " + obj.tradeAmount + "<br>";
-            output.innerHTML += "交易时间: " + obj.createTime + "<hr>";
+            output.innerHTML += "交易时间: " + obj.createTime + "<br>";
+            if(obj.dependencies){
+                for(var j=0; j<obj.dependencies.length; j++) {
+                    var sellOrder = obj.dependencies[j];
+                    output.innerHTML += " -> 卖: " + sellOrder.tradeTime + " 份额："+ sellOrder.tradeAmount + " 收益：" + sellOrder.currentProfitFee + "(" + sellOrder.currentProfitRatio+")<br>";
+                }
+            }
+            output.innerHTML += "<hr>";
         }
-        $("#json").JSONView(tradeData);
+//        $("#json").JSONView(tradeData);
         $('#buy-btn').show();
         $('#json').JSONView('toggle', 1);
       }

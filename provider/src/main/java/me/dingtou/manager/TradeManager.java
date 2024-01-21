@@ -97,6 +97,7 @@ public class TradeManager {
         if (null != calculate && null != calculate.getSellOrders()) {
             List<String> outIds = calculate.getSellOrders().stream().map(Order::getOutId).collect(Collectors.toList());
             snapshot.put(OrderSnapshotKeys.BUY_ORDER_OUT_IDS, JSON.toJSONString(outIds));
+            order.setDependencies(calculate.getSellOrders());
         }
         order.setSnapshot(snapshot);
 
