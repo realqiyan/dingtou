@@ -50,9 +50,9 @@ public class StockPriceStrategy extends BasePriceStrategy {
     @Override
     public BigDecimal currentPrice(Stock stock) {
         if (Market.SH.equals(stock.getMarket())) {
-            return getStockPrice(String.format("http://qt.gtimg.cn/q=sh%s", stock.getCode()));
+            return getStockPrice(String.format("https://forward.myworker.win/http://qt.gtimg.cn/q=sh%s", stock.getCode()));
         } else if (Market.SZ.equals(stock.getMarket())) {
-            return getStockPrice(String.format("http://qt.gtimg.cn/q=sz%s", stock.getCode()));
+            return getStockPrice(String.format("https://forward.myworker.win/http://qt.gtimg.cn/q=sz%s", stock.getCode()));
         }
         return null;
     }
@@ -112,10 +112,10 @@ public class StockPriceStrategy extends BasePriceStrategy {
         try {
             //日K:https://quotes.sina.cn/cn/api/json_v2.php/CN_MarketDataService.getKLineData?symbol=sz000002&scale=240&ma=no&datalen=30
             String symbol = (stock.getMarket().equals(Market.SH) ? "sh" : "sz") + stock.getCode();
-            String historyApiUrl = String.format("https://quotes.sina.cn/cn/api/json_v2.php/CN_MarketDataService.getKLineData?symbol=%s&scale=240&ma=no&datalen=%s", symbol, timeSpan);
+            String historyApiUrl = String.format("https://forward.myworker.win/https://quotes.sina.cn/cn/api/json_v2.php/CN_MarketDataService.getKLineData?symbol=%s&scale=240&ma=no&datalen=%s", symbol, timeSpan);
 
             //前复权:https://finance.sina.com.cn/realstock/company/sz000002/qfq.js
-            String adjustApiUrl = String.format("https://finance.sina.com.cn/realstock/company/%s/qfq.js", symbol);
+            String adjustApiUrl = String.format("https://forward.myworker.win/https://finance.sina.com.cn/realstock/company/%s/qfq.js", symbol);
 
             List<StockPrice> prices = new ArrayList<StockPrice>();
             String historyContent = HttpUtils.getUrlContent(historyApiUrl);
