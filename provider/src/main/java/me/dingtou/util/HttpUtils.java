@@ -32,8 +32,11 @@ public class HttpUtils {
     public static String getUrlContent(String url) {
         CloseableHttpResponse response = null;
         try {
-            HttpGet httpGet = new HttpGet(url);
-            response = httpclient.execute(httpGet);
+            response = httpclient.execute(new HttpGet(url));
+            if (null == response || response.getStatusLine().getStatusCode() != 200) {
+                String forwardUrl = "https://forward.myworker.win/" + url;
+                response = httpclient.execute(new HttpGet(forwardUrl));
+            }
             return EntityUtils.toString(response.getEntity());
         } catch (Exception e) {
             log.error("getUrlContent error, url:" + url, e);

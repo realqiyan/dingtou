@@ -201,7 +201,7 @@ public class ApiController {
         try {
             tradeService.settlement(owner);
         } catch (Throwable t) {
-            log.error("settlement error,message:"+t.getMessage());
+            log.error("settlement error,message:" + t.getMessage());
         }
         List<Stock> stockList = stockService.query(owner, null);
         if (null == stockList || stockList.isEmpty()) {
@@ -219,13 +219,15 @@ public class ApiController {
     }
 
     @RequestMapping(value = "/trade/buy", method = RequestMethod.POST)
-    public List<Order> tradeBuy(@RequestParam(value = "orders", required = true) String orders) throws Exception {
+    public List<Order> tradeBuy(@RequestParam(value = "outIds", required = true) String outIds,
+                                @RequestParam(value = "orders", required = true) String orders) throws Exception {
         String owner = SessionUtils.getCurrentOwner();
+        List<String> outIdList = JSON.parseArray(outIds, String.class);
         List<Order> orderList = JSON.parseArray(orders, Order.class);
 
         List<Order> resultOrders = new ArrayList<>();
         for (Order order : orderList) {
-            if (!owner.equals(order.getStock().getOwner())) {
+            if (!owner.equals(order.getStock().getOwner()) || !outIdList.contains(order.getOutId())) {
                 continue;
             }
             Order buyOrder = tradeService.buy(order);

@@ -52,6 +52,10 @@ public class AverageValueTradeStrategy implements TradeStrategy {
      */
     public static final String CURRENT_TRADE_PRICE = "currentTradePrice";
     /**
+     * 本次增量价格
+     */
+    public static final String CURRENT_INCREMENT = "currentIncrement";
+    /**
      * 单次最大交易价格
      */
     public static final String PER_MAX_TRADE_PRICE = "perMaxTradePrice";
@@ -126,6 +130,7 @@ public class AverageValueTradeStrategy implements TradeStrategy {
         Pair<List<Integer>, List<BigDecimal>> smaStrategyPair = parseSmaStrategyPair(smaStrategyConfig);
         // 计算步长
         BigDecimal increment = calculateIncrement(stock, currentPrice, smaStrategyPair);
+        attributes.put(CURRENT_INCREMENT, increment.toPlainString());
         // 目标价值=上期目标价值+increment
         BigDecimal targetValue = currentTargetValue.add(increment);
         // 买入上限
