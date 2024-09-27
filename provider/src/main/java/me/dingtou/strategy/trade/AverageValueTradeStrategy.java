@@ -82,9 +82,9 @@ public class AverageValueTradeStrategy implements TradeStrategy {
      */
     public static final double OVER_RATIO = 1.0;
     /**
-     * 卖出时，当前价格涨幅少于比例不卖出 5%
+     * 卖出时，当前价格涨幅少于比例不卖出 15%
      */
-    public static final double SELL_PROFIT_RATIO = 0.05;
+    public static final double SELL_PROFIT_RATIO = 0.15;
     @Autowired
     private PriceManager priceManager;
 
