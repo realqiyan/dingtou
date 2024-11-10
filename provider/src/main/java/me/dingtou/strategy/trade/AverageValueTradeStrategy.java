@@ -81,10 +81,12 @@ public class AverageValueTradeStrategy implements TradeStrategy {
      * 1必须足额才能买卖，不支持买入卖出"四舍五入" 0.5就支持四舍五入
      */
     public static final double OVER_RATIO = 1.0;
+
     /**
-     * 卖出时，当前价格涨幅少于比例不卖出 15%
+     * sellProfitRatio卖出的盈利比例，默认当前价格涨幅少于比例不卖出 15%
      */
-    public static final double SELL_PROFIT_RATIO = 0.15;
+    public static final String SELL_PROFIT_RATIO_KEY = "sellProfitRatio";
+    public static final String SELL_PROFIT_RATIO_DEFAULT_VALUE = "0.15";
     @Autowired
     private PriceManager priceManager;
 
@@ -153,15 +155,20 @@ public class AverageValueTradeStrategy implements TradeStrategy {
                 tradeFee = perMaxTradePrice;
             }
         }
+        // sellProfitRatio卖出的盈利比例
+        String sellProfitRatioStr = attributes.getOrDefault(SELL_PROFIT_RATIO_KEY, SELL_PROFIT_RATIO_DEFAULT_VALUE);
+        BigDecimal sellProfitRatio = new BigDecimal(sellProfitRatioStr);
+        // 冗余记录sellProfitRatio卖出的盈利比例
+        attributes.put(SELL_PROFIT_RATIO_KEY, sellProfitRatioStr);
         //最总交易金额（tradeFee）如果是买入则继续计算，如果是卖出，就去匹配历史交易订单。
         if (tradeFee.compareTo(BigDecimal.ZERO) > 0) {
             return buy(stock, targetValue, tradeFee, currentPrice);
         } else {
-            return sell(stock, stockOrders, targetValue, tradeFee, currentPrice);
+            return sell(stock, stockOrders, targetValue, tradeFee, currentPrice, sellProfitRatio);
         }
     }
 
-    private TradeDetail sell(Stock stock, List<Order> stockOrders, BigDecimal targetValue, BigDecimal tradeFee, BigDecimal currentPrice) {
+    private TradeDetail sell(Stock stock, List<Order> stockOrders, BigDecimal targetValue, BigDecimal tradeFee, BigDecimal currentPrice, BigDecimal sellProfitRatio) {
         // 需要过滤已经卖出的订单
         List<String> orderOutIds = stockOrders.stream()
                 .filter(order -> TradeType.SELL.equals(order.getType()))
@@ -188,7 +195,7 @@ public class AverageValueTradeStrategy implements TradeStrategy {
                     BigDecimal currentProfitRatio = currentProfitFee.divide(order.getTradeFee(), 2, RoundingMode.HALF_UP);
                     order.setCurrentProfitRatio(currentProfitRatio);
                 })
-                .filter(order -> order.getCurrentProfitRatio().compareTo(BigDecimal.valueOf(SELL_PROFIT_RATIO)) > 0)
+                .filter(order -> order.getCurrentProfitRatio().compareTo(sellProfitRatio) > 0)
                 .sorted(Comparator.comparing(Order::getTradeFee))
                 .collect(Collectors.toList());
 
