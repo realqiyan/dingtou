@@ -11,10 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static java.math.BigDecimal.ROUND_DOWN;
 
 @Service
 @Slf4j
@@ -84,7 +83,7 @@ public class StockServiceImpl implements StockService {
                 currentPrice = BigDecimal.ZERO;
             }
             asset.setCurrentPrice(currentPrice);
-            asset.setTotalFee(currentPrice.multiply(e.getAmount()).setScale(2, ROUND_DOWN));
+            asset.setTotalFee(currentPrice.multiply(e.getAmount()).setScale(2, RoundingMode.DOWN));
             return asset;
         }).collect(Collectors.toList());
 
@@ -103,7 +102,7 @@ public class StockServiceImpl implements StockService {
                 asset.setRatio(BigDecimal.ONE.subtract(totalRatio));
                 break;
             }
-            BigDecimal ratio = asset.getTotalFee().divide(totalAssetFee, 4, BigDecimal.ROUND_HALF_UP);
+            BigDecimal ratio = asset.getTotalFee().divide(totalAssetFee, 4, RoundingMode.HALF_UP);
             totalRatio = totalRatio.add(ratio);
             asset.setRatio(ratio);
         }

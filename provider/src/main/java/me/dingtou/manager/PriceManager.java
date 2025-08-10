@@ -30,7 +30,6 @@ public class PriceManager {
      */
     public BigDecimal getCurrentPrice(Stock stock) {
 
-
         for (PriceStrategy priceStrategy : priceStrategies) {
             if (priceStrategy.isMatch(stock)) {
                 return priceStrategy.currentPrice(stock);
@@ -48,7 +47,6 @@ public class PriceManager {
      * @return
      */
     public BigDecimal getSettlementPrice(Stock stock, Date date) {
-
 
         for (PriceStrategy priceStrategy : priceStrategies) {
             if (priceStrategy.isMatch(stock)) {
@@ -71,6 +69,9 @@ public class PriceManager {
         for (PriceStrategy priceStrategy : priceStrategies) {
             if (priceStrategy.isMatch(stock)) {
                 List<StockPrice> stockPrices = priceStrategy.listPrice(stock, date, x);
+                if (null == stockPrices || stockPrices.isEmpty()) {
+                    continue;
+                }
                 // 结果按照时间排序
                 stockPrices.sort((o1, o2) -> {
                     if (null == o1 || null == o2) {
@@ -94,7 +95,8 @@ public class PriceManager {
         if (null == targetIndexCode) {
             return null;
         }
-        String url = String.format("https://danjuanapp.com/djapi/index_eva/detail/%s", targetIndexCode.trim().toUpperCase());
+        String url = String.format("https://danjuanapp.com/djapi/index_eva/detail/%s",
+                targetIndexCode.trim().toUpperCase());
         String content = HttpUtils.getUrlContent(url);
         JSONObject jsonObject = JSON.parseObject(content);
         JSONObject data = jsonObject.getJSONObject("data");

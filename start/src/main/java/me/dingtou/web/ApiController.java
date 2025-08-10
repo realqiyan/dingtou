@@ -16,10 +16,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static java.math.BigDecimal.ROUND_DOWN;
 import static me.dingtou.strategy.trade.AverageValueTradeStrategy.*;
 
 @Slf4j
@@ -167,7 +167,7 @@ public class ApiController {
                 assetChartView.setValue(asset.getRatio().multiply(multiplicand).toPlainString());
                 children.add(assetChartView);
             }
-            String ratio = totalRatio.multiply(BigDecimal.valueOf(100)).setScale(2, ROUND_DOWN).toPlainString();
+            String ratio = totalRatio.multiply(BigDecimal.valueOf(100)).setScale(2, RoundingMode.DOWN).toPlainString();
             ChartView categoryChartView = new ChartView();
             categoryChartView.setName(category + '-' + ratio + '%');
             String value = totalRatio.multiply(multiplicand).toPlainString();
@@ -188,7 +188,7 @@ public class ApiController {
      */
     private ChartView buildAssetChartView(Asset asset) {
         ChartView chartView = new ChartView();
-        String ratio = asset.getRatio().multiply(BigDecimal.valueOf(100)).setScale(2, ROUND_DOWN).toPlainString();
+        String ratio = asset.getRatio().multiply(BigDecimal.valueOf(100)).setScale(2, RoundingMode.DOWN).toPlainString();
         chartView.setName(asset.getCategory() + '-' + asset.getName() + '-' + ratio + '%');
         chartView.setValue(asset.getTotalFee().toPlainString());
         return chartView;

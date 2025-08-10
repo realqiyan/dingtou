@@ -4,11 +4,11 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.Cookie;
 import lombok.extern.slf4j.Slf4j;
 import me.dingtou.web.model.LoginUser;
 import org.apache.commons.lang3.time.DateUtils;
 
-import javax.servlet.http.Cookie;
 import java.security.Key;
 import java.util.Date;
 

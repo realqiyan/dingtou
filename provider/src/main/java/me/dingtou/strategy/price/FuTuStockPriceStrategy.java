@@ -2,12 +2,9 @@ package me.dingtou.strategy.price;
 
 import com.futu.openapi.pb.QotCommon;
 import lombok.extern.slf4j.Slf4j;
-import me.dingtou.constant.Market;
 import me.dingtou.model.Stock;
 import me.dingtou.model.StockPrice;
 import me.dingtou.strategy.price.futu.FuTuAPI;
-import org.springframework.stereotype.Component;
-
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

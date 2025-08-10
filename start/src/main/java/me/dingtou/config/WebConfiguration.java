@@ -29,9 +29,9 @@ public class WebConfiguration implements WebMvcConfigurer {
     private String defaultOwner;
 
     @Bean
-    public FilterRegistrationBean filterRegistrationBean() {
+    public FilterRegistrationBean<LoginFilter> filterRegistrationBean() {
 
-        FilterRegistrationBean registrationBean = new FilterRegistrationBean();
+        FilterRegistrationBean<LoginFilter> registrationBean = new FilterRegistrationBean<>();
         String defaultOwner = this.defaultOwner;
         defaultOwner = ((null == defaultOwner) ? DEFAULT : defaultOwner);
         LoginFilter filter = new LoginFilter(needLogin, defaultOwner, secretKey, loginUrl);
