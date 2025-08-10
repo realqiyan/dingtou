@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 
 /**
  * 价值平均定投策略增强版（增加上浮比例）
+ * 
  * <pre>
  * 当前持有价值=当前基金持有份额*当前基金价格
  * 定投目标价值=本次定投结束后所持有基金的总价值
@@ -72,7 +73,8 @@ public class AverageValueTradeStrategy implements TradeStrategy {
      */
     public static final String MAX_TARGET_VALUE_KEY = "maxTargetValue";
     /**
-     * sma策略 配置说明：均线数量n|均线1,均线2,均线n|高于1条均线购买比例,高于2条均线购买比例,高于n条均线购买比例 例如：4|10,30,60,120|1.5,1.25,1,0
+     * sma策略 配置说明：均线数量n|均线1,均线2,均线n|高于1条均线购买比例,高于2条均线购买比例,高于n条均线购买比例
+     * 例如：4|10,30,60,120|1.5,1.25,1,0
      * 注意：自由落体趋势会暂停购买（低于所有均线不买入）
      */
     public static final String SMA_STRATEGY_KEY = "smaStrategy";
@@ -160,7 +162,7 @@ public class AverageValueTradeStrategy implements TradeStrategy {
         BigDecimal sellProfitRatio = new BigDecimal(sellProfitRatioStr);
         // 冗余记录sellProfitRatio卖出的盈利比例
         attributes.put(SELL_PROFIT_RATIO_KEY, sellProfitRatioStr);
-        //最总交易金额（tradeFee）如果是买入则继续计算，如果是卖出，就去匹配历史交易订单。
+        // 最总交易金额（tradeFee）如果是买入则继续计算，如果是卖出，就去匹配历史交易订单。
         if (tradeFee.compareTo(BigDecimal.ZERO) > 0) {
             return buy(stock, targetValue, tradeFee, currentPrice);
         } else {
@@ -168,7 +170,8 @@ public class AverageValueTradeStrategy implements TradeStrategy {
         }
     }
 
-    private TradeDetail sell(Stock stock, List<Order> stockOrders, BigDecimal targetValue, BigDecimal tradeFee, BigDecimal currentPrice, BigDecimal sellProfitRatio) {
+    private TradeDetail sell(Stock stock, List<Order> stockOrders, BigDecimal targetValue, BigDecimal tradeFee,
+            BigDecimal currentPrice, BigDecimal sellProfitRatio) {
         // 需要过滤已经卖出的订单
         List<String> orderOutIds = stockOrders.stream()
                 .filter(order -> TradeType.SELL.equals(order.getType()))
@@ -192,7 +195,8 @@ public class AverageValueTradeStrategy implements TradeStrategy {
                             .subtract(order.getTradeFee())
                             .subtract(order.getTradeServiceFee());
                     order.setCurrentProfitFee(currentProfitFee);
-                    BigDecimal currentProfitRatio = currentProfitFee.divide(order.getTradeFee(), 2, RoundingMode.HALF_UP);
+                    BigDecimal currentProfitRatio = currentProfitFee.divide(order.getTradeFee(), 2,
+                            RoundingMode.HALF_UP);
                     order.setCurrentProfitRatio(currentProfitRatio);
                 })
                 .filter(order -> order.getCurrentProfitRatio().compareTo(sellProfitRatio) > 0)
@@ -205,7 +209,8 @@ public class AverageValueTradeStrategy implements TradeStrategy {
         BigDecimal sellAmount = new BigDecimal(0);
         for (Order order : orderList) {
             BigDecimal tradeAmount = order.getTradeAmount();
-            if (tradeAmount.compareTo(sellTotalAmount) > 0 || sellAmount.add(tradeAmount).compareTo(sellTotalAmount) > 0) {
+            if (tradeAmount.compareTo(sellTotalAmount) > 0
+                    || sellAmount.add(tradeAmount).compareTo(sellTotalAmount) > 0) {
                 break;
             }
             sellOrders.add(order);
@@ -220,7 +225,6 @@ public class AverageValueTradeStrategy implements TradeStrategy {
         return new TradeDetail(targetValue, sellFee, sellAmount, tradeServiceFee, sellOrders);
 
     }
-
 
     private static TradeDetail buy(Stock stock, BigDecimal targetValue, BigDecimal tradeFee, BigDecimal currentPrice) {
         TradeCfg tradeCfg = stock.getTradeCfg();
@@ -237,7 +241,8 @@ public class AverageValueTradeStrategy implements TradeStrategy {
             // 超过比例就加买/加卖一手
             BigDecimal multiple = bigDecimals[0];
             if (Math.abs(divide.doubleValue()) >= OVER_RATIO) {
-                multiple = bigDecimals[0].doubleValue() >= 0 ? bigDecimals[0].add(BigDecimal.ONE) : bigDecimals[0].subtract(BigDecimal.ONE);
+                multiple = bigDecimals[0].doubleValue() >= 0 ? bigDecimals[0].add(BigDecimal.ONE)
+                        : bigDecimals[0].subtract(BigDecimal.ONE);
             }
             tradeAmount = multiple.multiply(minTradeAmount);
             tradeFee = currentPrice.multiply(tradeAmount);
@@ -246,7 +251,6 @@ public class AverageValueTradeStrategy implements TradeStrategy {
         BigDecimal tradeServiceFee = getTradeServiceFee(tradeFee, tradeCfg);
         return new TradeDetail(targetValue, tradeFee, tradeAmount, tradeServiceFee);
     }
-
 
     /**
      * 计算交易服务费
@@ -262,18 +266,19 @@ public class AverageValueTradeStrategy implements TradeStrategy {
                 tradeServiceFee = tradeFee.abs().multiply(tradeCfg.getServiceFeeRate());
                 tradeServiceFee = tradeServiceFee.setScale(2, RoundingMode.HALF_DOWN);
             }
-            if (null != tradeCfg.getMinServiceFee() && tradeServiceFee.doubleValue() < tradeCfg.getMinServiceFee().doubleValue()) {
+            if (null != tradeCfg.getMinServiceFee()
+                    && tradeServiceFee.doubleValue() < tradeCfg.getMinServiceFee().doubleValue()) {
                 tradeServiceFee = tradeCfg.getMinServiceFee();
             }
         }
         return tradeServiceFee;
     }
 
-
     /**
      * 解析Sma策略配置字符串并返回包含平均线列表和买入比例列表的Pair对象
      *
-     * @param smaStrategyConfig Sma策略的配置字符串，格式为 "n|avg1,avg2,...,avgn|buyRatio1,buyRatio2,...,buyRatioN"
+     * @param smaStrategyConfig Sma策略的配置字符串，格式为
+     *                          "n|avg1,avg2,...,avgn|buyRatio1,buyRatio2,...,buyRatioN"
      * @return 包含平均线列表和买入比例列表的Pair对象
      * @throws IllegalArgumentException 如果输入的格式不正确或者平均线数量与买入比例数量不匹配，则抛出此异常
      */
@@ -292,7 +297,8 @@ public class AverageValueTradeStrategy implements TradeStrategy {
         String[] buyRatios = segments[2].split(",");
         // 如果平均线数量或者买入比例数量与声明的数量不匹配，则抛出异常
         if (avgLines.length != n || buyRatios.length != n) {
-            throw new IllegalArgumentException("The number of average lines or buy ratios does not match the declared number");
+            throw new IllegalArgumentException(
+                    "The number of average lines or buy ratios does not match the declared number");
         }
         // 创建平均线列表和买入比例列表
         List<Integer> avgLineList = new ArrayList<>();
@@ -309,7 +315,6 @@ public class AverageValueTradeStrategy implements TradeStrategy {
         return Pair.of(avgLineList, buyRatioList);
     }
 
-
     /**
      * 计算买入金额
      *
@@ -318,7 +323,8 @@ public class AverageValueTradeStrategy implements TradeStrategy {
      * @param smaStrategyPair 均线策略
      * @return 买入金额
      */
-    private BigDecimal calculateIncrement(Stock stock, BigDecimal currentPrice, Pair<List<Integer>, List<BigDecimal>> smaStrategyPair) {
+    private BigDecimal calculateIncrement(Stock stock, BigDecimal currentPrice,
+            Pair<List<Integer>, List<BigDecimal>> smaStrategyPair) {
         TradeCfg tradeCfg = stock.getTradeCfg();
         // 默认步长
         BigDecimal increment = tradeCfg.getIncrement();
@@ -339,7 +345,7 @@ public class AverageValueTradeStrategy implements TradeStrategy {
             BigDecimal totalPrice = BigDecimal.ZERO;
             for (StockPrice stockPrice : stockPrices) {
                 // 没有复权至就直接返回
-                if (null == stockPrice.getRehabPrice()) {
+                if (null == stockPrice || null == stockPrice.getRehabPrice()) {
                     return increment;
                 }
                 totalPrice = totalPrice.add(stockPrice.getRehabPrice());
@@ -356,7 +362,7 @@ public class AverageValueTradeStrategy implements TradeStrategy {
                 overNum++;
             }
         }
-        //低于所有均线就进入下跌通道了，暂停买入。
+        // 低于所有均线就进入下跌通道了，暂停买入。
         BigDecimal buyRatio = overNum == -1 ? BigDecimal.ZERO : smaStrategyPair.getRight().get(overNum);
         log.info("stock:{},overNum-1:{},multiplyVal:{}", stock.getCode(), overNum, buyRatio);
         increment = increment.multiply(buyRatio);
@@ -379,9 +385,9 @@ public class AverageValueTradeStrategy implements TradeStrategy {
                 // 冗余记录当前指数估值
                 tradeCfg.getAttributes().put(CURRENT_TARGET_INDEX_VALUATION, indexValuationRatio.toPlainString());
                 // 估值水位75%～100% 0倍
-                // 估值水位50%～75%  0.5倍
-                // 估值水位25%～50%  1倍
-                // 估值水位 0%～25%  1.5倍
+                // 估值水位50%～75% 0.5倍
+                // 估值水位25%～50% 1倍
+                // 估值水位 0%～25% 1.5倍
                 if (indexValuationRatio.doubleValue() > 0.75) {
                     increment = BigDecimal.ZERO;
                 } else if (indexValuationRatio.doubleValue() > 0.5) {
@@ -395,7 +401,6 @@ public class AverageValueTradeStrategy implements TradeStrategy {
         }
         return increment;
     }
-
 
     @Override
     public TradeDetail calculateSettlement(Order order) {
